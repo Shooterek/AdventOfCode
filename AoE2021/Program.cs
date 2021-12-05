@@ -6,7 +6,7 @@ namespace AoE2021
     {
         static void Main(string[] args)
         {
-            var day = new Day4("./Inputs/day4.txt");
+            var day = new Day5("./Inputs/day5.txt");
 
             Console.WriteLine(day.FirstTask());
             Console.WriteLine(day.SecondTask());
