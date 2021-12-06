@@ -7,13 +7,13 @@ namespace AoE2021
 {
     public class Day5 : Day
     {
-        public Day5(string inputPath) : base(inputPath)
+        public Day5() : base("day5")
         {
         }
 
-        public override string FirstTask()
+        protected override object FirstTask()
         {
-            var input = _inputLoader.LoadStringListInput(this._inputPath);
+            var input = _inputLoader.LoadStringListInput();
             var x = new Dictionary<(int, int), int>();
             foreach (var inputLine in input)
             {
@@ -54,12 +54,12 @@ namespace AoE2021
             }
 
 
-            return x.Count(pair => pair.Value > 1).ToString();
+            return x.Count(pair => pair.Value > 1);
         }
 
-        public override string SecondTask()
+        protected override object SecondTask()
         {
-            var input = _inputLoader.LoadStringListInput(this._inputPath);
+            var input = _inputLoader.LoadStringListInput();
             var x = new Dictionary<(int, int), int>();
             foreach (var inputLine in input)
             {
@@ -97,7 +97,7 @@ namespace AoE2021
             }
 
 
-            return x.Count(pair => pair.Value > 1).ToString();
+            return x.Count(pair => pair.Value > 1);
         }
     }
 }

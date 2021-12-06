@@ -1,22 +1,17 @@
 ﻿using AoE2021.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AoE2021
 {
     class Day1 : Day
     {
-        public Day1(string inputPath) : base(inputPath)
+        public Day1() : base("day1")
         {
 
         }
-        public override string FirstTask()
+        protected override object FirstTask()
         {
             var increasedDepth = 0;
-            var input = _inputLoader.LoadIntListInput(_inputPath);
+            var input = _inputLoader.LoadIntListInput();
 
             for (int i = 1; i < input.Count; i++)
             {
@@ -24,13 +19,13 @@ namespace AoE2021
                     increasedDepth++;
             }
 
-            return increasedDepth.ToString();
+            return increasedDepth;
         }
 
-        public override string SecondTask()
+        protected override object SecondTask()
         {
             var increasedDepth = 0;
-            var input = _inputLoader.LoadIntListInput(_inputPath);
+            var input = _inputLoader.LoadIntListInput();
 
             for (int i = 3; i < input.Count; i++)
             {
@@ -41,7 +36,7 @@ namespace AoE2021
                     increasedDepth++;
             }
 
-            return increasedDepth.ToString();
+            return increasedDepth;
         }
     }
 }

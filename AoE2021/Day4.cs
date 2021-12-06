@@ -7,13 +7,13 @@ namespace AoE2021
 {
     public class Day4 : Day
     {
-        public Day4(string inputPath) : base(inputPath)
+        public Day4() : base("day4")
         {
         }
 
-        public override string FirstTask()
+        protected override object FirstTask()
         {
-            var input = _inputLoader.LoadStringBatches(this._inputPath);
+            var input = _inputLoader.LoadStringBatches();
             var numbers = input[0].Split(',')
                 .Select(int.Parse)
                 .ToList();
@@ -25,16 +25,16 @@ namespace AoE2021
                 {
                     board.Mark(inputNumber);
                     if (board.Score != null)
-                        return board.Score.Value.ToString();
+                        return board.Score.Value;
                 }
             }
             
             return "";
         }
 
-        public override string SecondTask()
+        protected override object SecondTask()
         {
-            var input = _inputLoader.LoadStringBatches(this._inputPath);
+            var input = _inputLoader.LoadStringBatches();
             var numbers = input[0].Split(',')
                 .Select(int.Parse)
                 .ToList();
@@ -59,7 +59,7 @@ namespace AoE2021
                 i++;
             }
 
-            return lastBoard.Score.Value.ToString();
+            return lastBoard.Score.Value;
         }
 
         private List<BingoBoard> CreateAllBoards(IEnumerable<string> batches)

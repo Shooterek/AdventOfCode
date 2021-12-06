@@ -1,22 +1,17 @@
 ﻿using AoE2021.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace AoE2021
 {
     public class Day2 : Day
     {
-        public Day2(string inputPath) : base(inputPath)
+        public Day2() : base("day2")
         {
 
         }
-        public override string FirstTask()
+        protected override object FirstTask()
         {
-            var input = _inputLoader.LoadStringListInput(this._inputPath);
+            var input = _inputLoader.LoadStringListInput();
             var regex = "(.+)\\s(\\d+)";
 
             long horizontal = 0;
@@ -46,12 +41,12 @@ namespace AoE2021
                 }
             }
 
-            return (horizontal * depth).ToString();
+            return horizontal * depth;
         }
 
-        public override string SecondTask()
+        protected override object SecondTask()
         {
-            var input = _inputLoader.LoadStringListInput(this._inputPath);
+            var input = _inputLoader.LoadStringListInput();
             var regex = "(.+)\\s(\\d+)";
 
             long horizontal = 0;
@@ -83,7 +78,7 @@ namespace AoE2021
                 }
             }
 
-            return (horizontal * depth).ToString();
+            return horizontal * depth;
         }
     }
 }

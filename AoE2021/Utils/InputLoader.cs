@@ -2,46 +2,50 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AoE2021.Utils
 {
     public class InputLoader
     {
         public static readonly string App = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
+        private readonly string path;
 
-        public List<string> LoadStringListInput(string filepath)
+        public InputLoader(string path)
         {
-            return File.ReadAllLines(Path.Combine(App, filepath))
+            this.path = Path.Combine(App, path);
+        }
+
+        public List<string> LoadStringListInput()
+        {
+            return File.ReadAllLines(this.path)
                 .ToList();
         }
 
-        internal List<long> LoadLongListInput(string inputPath)
+        internal List<long> LoadLongListInput()
         {
             List<long> input = new List<long>();
-            foreach (var line in File.ReadAllLines(Path.Combine(App, inputPath)))
+            foreach (var line in File.ReadAllLines(this.path))
             {
-                input.Add(Int64.Parse(line));
+                input.Add(long.Parse(line));
             }
 
             return input;
         }
 
-        public List<int> LoadIntListInput(string filepath)
+        public List<int> LoadIntListInput()
         {
             List<int> input = new List<int>();
-            foreach (var line in File.ReadAllLines(Path.Combine(App, filepath)))
+            foreach (var line in File.ReadAllLines(this.path))
             {
-                input.Add(Int32.Parse(line));
+                input.Add(int.Parse(line));
             }
 
             return input;
         }
 
-        public List<string> LoadStringBatches(string filepath)
+        public List<string> LoadStringBatches()
         {
-            var batches = File.ReadAllText(Path.Combine(App, filepath))
+            var batches = File.ReadAllText(this.path)
                 .Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(batch => batch.Replace('\n', ' '))
                 .ToList();

@@ -3,20 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace AoE2021
 {
     public class Day3 : Day
     {
-        public Day3(string inputPath) : base(inputPath)
+        public Day3() : base("day3")
         {
-
         }
-        public override string FirstTask()
+        protected override object FirstTask()
         {
-            var input = _inputLoader.LoadStringListInput(this._inputPath);
+            var input = _inputLoader.LoadStringListInput();
             StringBuilder gamma = new(), epsilon = new();
             for (var i = 0; i < input[0].Length; i++)
             {
@@ -45,12 +42,12 @@ namespace AoE2021
                 }
             }
 
-            return (Convert.ToInt32(gamma.ToString(), 2) * Convert.ToInt32(epsilon.ToString(), 2)).ToString();
+            return Convert.ToInt32(gamma.ToString(), 2) * Convert.ToInt32(epsilon.ToString(), 2);
         }
 
-        public override string SecondTask()
+        protected override object SecondTask()
         {
-            List<string> oxygenRatingList = _inputLoader.LoadStringListInput(this._inputPath), co2List = _inputLoader.LoadStringListInput(this._inputPath);
+            List<string> oxygenRatingList = _inputLoader.LoadStringListInput(), co2List = _inputLoader.LoadStringListInput();
          
             for (var i = 0; i < oxygenRatingList[0].Length && oxygenRatingList.Count > 1;  i++)
             {
@@ -90,7 +87,7 @@ namespace AoE2021
                 i %= co2List[0].Length;
             }
 
-            return (Convert.ToInt32(co2List.First().ToString(), 2) * Convert.ToInt32(oxygenRatingList.First().ToString(), 2)).ToString();
+            return Convert.ToInt32(co2List.First().ToString(), 2) * Convert.ToInt32(oxygenRatingList.First().ToString(), 2);
         }
     }
 }
