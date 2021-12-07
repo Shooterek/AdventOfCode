@@ -33,15 +33,19 @@ namespace AoE2021
         protected override object SecondTask()
         {
             var numbers = this._inputLoader.LoadIntListFromOneLine();
+            var cache = new Dictionary<int, long>();
+            var numberMax = numbers.Max();
+
+            for (int i = 0; i <= numbers.Max(); i++)
+            {
+                cache.Add(i, Enumerable.Range(1, i).Sum());
+            }
+
             var minPath = long.MaxValue;
             var minNumber = long.MinValue;
-
             for (int i = 0; i < numbers.Max(); i++)
             {
-                long pathLength = numbers.Sum(x =>
-                {
-                    return Enumerable.Range(1, Math.Abs(x - i)).Sum();
-                });
+                long pathLength = numbers.Sum(x => cache[Math.Abs(x - i)]);
                 if (pathLength < minPath)
                 {
                     minPath = pathLength;
