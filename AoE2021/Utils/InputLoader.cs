@@ -43,6 +43,11 @@ namespace AoE2021.Utils
             return input;
         }
 
+        public List<int> LoadIntListFromOneLine(string separator = ",")
+        {
+            return File.ReadAllText(this.path).Split(separator).Select(int.Parse).ToList();
+        }
+
         public List<string> LoadStringBatches()
         {
             var batches = File.ReadAllText(this.path)
