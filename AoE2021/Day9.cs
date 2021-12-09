@@ -42,19 +42,17 @@ namespace AoE2021
 
         protected override object SecondTask()
         {
-            var lines = this._inputLoader.LoadStringListInput().Select(x => x.ToCharArray().Select(x => (int)Char.GetNumericValue(x)).ToArray()).ToArray();
-            var sum = 0;
-            for (int i = 0; i < lines.Length; i++)
-            {
-                for (int j = 0; j < lines[i].Length; j++)
-                {
-                    if (lines[i][j] != 9)
-                        sum++;
-                }
-            }
+			var lines = this._inputLoader.LoadStringListInput().Select(x => x.ToCharArray().Select(x => (int)Char.GetNumericValue(x)).ToArray()).ToArray();
+			var sum = 0;
+			for (int i = 0; i < lines.Length; i++)
+			{
+				for (int j = 0; j < lines[i].Length; j++)
+				{
+				}
+			}
 
 
-            return sum;
-        }
+			return sum;
+		}
     }        
 }
