@@ -43,7 +43,6 @@ namespace AoE2021
         protected override object SecondTask()
         {
             var lines = this._inputLoader.LoadStringListInput().Select(x => x.ToCharArray().Select(x => (int)Char.GetNumericValue(x)).ToArray()).ToArray();
-            var sum = 0;
             var yLength = lines.Length;
             var xLength = lines[0].Length;
             var stack = new Stack<(int x, int y)>();
