@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace AoE2021
+﻿namespace AoE2021
 {
-    class Program
+	class Program
     {
         static void Main(string[] args)
         {
-            var day = new Day9();
+            var day = new Day11();
 
             day.RunFirstTask();
             day.RunSecondTask();
