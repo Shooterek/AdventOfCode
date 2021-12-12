@@ -33,7 +33,7 @@ namespace AoE2021
 			}
 
 			PossiblePaths("start", caves["start"]);
-			return correctPaths.Count();
+			return correctPaths.Count;
 
 			void PossiblePaths(string previousCaves, Cave currCave)
 			{
@@ -53,7 +53,6 @@ namespace AoE2021
 		{
 			var caveInput = this._inputLoader.LoadStringListInput();
 			var caves = new Dictionary<string, Cave>();
-			var counter = 0;
 			var correctPaths = new List<string>();
 			foreach (var path in caveInput.Select(x => x.Split('-')))
 			{
@@ -71,20 +70,19 @@ namespace AoE2021
 				secondCave.AddNeighbour(firstCave);
 			}
 
-			PossiblePaths(new List<string> { "start" }, caves["start"]);
-			return counter;
+			PossiblePaths(new List<string> { "start" }, caves["start"], true);
+			return correctPaths.Count;
 
-			void PossiblePaths(List<string> previousCaves, Cave currCave)
+			void PossiblePaths(List<string> previousCaves, Cave currCave, bool canContainAnotherDuplicate)
 			{
 				if (previousCaves.Contains("end"))
 				{
-					counter++;
 					correctPaths.Add(string.Join(",", previousCaves));
 					return;
 				}
-				foreach (var cave in currCave.Neighbours.Where(x => x.Id != "start" && (!x.IsSmall || (previousCaves.Count(r => r == x.Id) < 2 && previousCaves.Where(r => r.ToUpper() != r).GroupBy(r => r).Select(r => r.Count()).Count(r => r > 1) < 2))))
+				foreach (var cave in currCave.Neighbours.Select(x => (cave: x, isDuplicate: previousCaves.Contains(x.Id))).Where(x => x.cave.Id != "start" && (!x.cave.IsSmall || (canContainAnotherDuplicate || !x.isDuplicate))))
 				{
-					PossiblePaths(previousCaves.Append(cave.Id).ToList(), cave);
+					PossiblePaths(previousCaves.Append(cave.cave.Id).ToList(), cave.cave, !cave.cave.IsSmall ? canContainAnotherDuplicate : (!cave.isDuplicate && canContainAnotherDuplicate));
 				}
 			}
 		}
