@@ -41,7 +41,7 @@ namespace AoE2021
 		protected override object SecondTask()
 		{
 			var input = this._inputLoader.LoadStringBatches();
-			var instr = input[0];
+			var instr = input[0].ToList();
 
 			var instructions = input[1].Split("\r").Select(x =>
 			{
@@ -51,14 +51,12 @@ namespace AoE2021
 
 			for (int i = 0; i < 10; i++)
 			{
-				var sb = new StringBuilder();
-				sb.Append(instr);
-				for (int j = 0; j < instr.Length - 1; j++)
+				for (int j = 0; j < instr.Count - 1; j += 2)
 				{
 					var z = $"{instr[j]}{instr[j + 1]}";
-					sb.Insert(1 + j * 2, instructions[z]);
+					var charToInsert = instructions[z];
+					instr.Insert(1 + j, charToInsert);
 				}
-				instr = sb.ToString();
 			}
 
 			var x = instr.GroupBy(x => x).Select(x => x.Count()).OrderByDescending(y => y);
