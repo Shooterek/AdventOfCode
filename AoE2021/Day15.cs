@@ -89,7 +89,8 @@ namespace AoE2021
 					{
 						Console.WriteLine(q.Count);
 					}
-					var currVertex = q.OrderBy(x => x.Du).First();
+					var min = q.Min(x => x.Du);
+					var currVertex = q.First(x => x.Du == min);
 					q.Remove(currVertex);
 					s.Add(currVertex);
 
