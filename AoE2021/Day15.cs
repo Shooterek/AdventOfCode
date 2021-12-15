@@ -58,7 +58,53 @@ namespace AoE2021
 
 		protected override object SecondTask()
 		{
-			return "";
+			var input = this._inputLoader.LoadStringListInput().Select(x => x.ToCharArray().Select(r => (int)char.GetNumericValue(r)).ToArray()).ToArray();
+			var q = new List<Vertex>();
+			var s = new List<Vertex>();
+
+			var inputLength = input.Length;
+			for (int i = 0; i < inputLength * 5; i++)
+			{
+				for (int j = 0; j < inputLength * 5; j++)
+				{
+					var v = new Vertex(i, j);
+					if (i == 0 && j == 0)
+						v.Du = 0;
+
+					var cost = (input[j % inputLength][i % inputLength] + i / input.Length + j / inputLength);
+					cost = cost > 9 ? cost % 9 : cost;
+					v.Cost = cost;
+					q.Add(v);
+				}
+			}
+			Dijkstra();
+
+			return s.Single(x => x.Y == inputLength * 5 - 1 && x.X == inputLength * 5 - 1).Du;
+
+			void Dijkstra()
+			{
+				while (q.Any())
+				{
+					if (q.Count % 1000 == 0)
+					{
+						Console.WriteLine(q.Count);
+					}
+					var currVertex = q.OrderBy(x => x.Du).First();
+					q.Remove(currVertex);
+					s.Add(currVertex);
+
+					var neighbours = q.Where(x => x.IsNeighbour(currVertex));
+					foreach (var n in neighbours)
+					{
+						var dist = n.Cost;
+						if (currVertex.Du + dist < n.Du)
+						{
+							n.Du = currVertex.Du + dist;
+							n.PreviousVertex = currVertex;
+						}
+					}
+				}
+			}
 		}
 
 		private class Vertex
@@ -72,6 +118,8 @@ namespace AoE2021
 			public int X { get; set; }
 
 			public int Y { get; set; }
+
+			public int Cost { get; set; }
 
 			public int Du { get; set; } = int.MaxValue;
 
