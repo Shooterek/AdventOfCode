@@ -55,6 +55,11 @@ namespace AoE2021.Utils
                 .Select(batch => batch.Replace('\n', ' '))
                 .ToList();
             return batches;
-        }
-    }
+		}
+
+		public string LoadEntireString()
+		{
+			return File.ReadAllText(this.path);
+		}
+	}
 }
