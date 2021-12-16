@@ -127,7 +127,6 @@ namespace AoE2021
 						if (part.StartsWith('0'))
 							break;
 					}
-					Console.WriteLine(z.Length % 4 == 0);
 					return (s, Convert.ToInt64(z, 2));
 				}
 				else
@@ -174,6 +173,7 @@ namespace AoE2021
 						"101" => (s, results[0] > results[1] ? 1 : 0),
 						"110" => (s, results[0] > results[1] ? 0 : 1),
 						"111" => (s, results[0] == results[1] ? 1 : 0),
+						_ => throw new Exception()
 					};
 					return res;
 				}
