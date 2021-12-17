@@ -23,13 +23,15 @@ namespace AoE2021
 			var yMin = int.Parse(yCords.Split("..")[0]);
 			var yMax = int.Parse(yCords.Split("..")[1]);
 
-			if (yMin < 0)
+			var val = Math.Abs(yMin) > (Math.Abs(yMax)) ? yMin : yMax;
+
+			if (val < 0)
 			{
-				yMin = Math.Abs(yMin);
-				return ((decimal)(0 + yMin - 1) / 2) * yMin;
+				val = Math.Abs(val);
+				return ((decimal)(0 + val - 1) / 2) * val;
 			}
 
-			return ((decimal)(0 + yMax) / 2) * (yMax + 1);
+			return ((decimal)(0 + val) / 2) * (val + 1);
 		}
 
 		protected override object SecondTask()
