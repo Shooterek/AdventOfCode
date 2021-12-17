@@ -23,15 +23,21 @@ namespace AoE2021
 			var yMin = int.Parse(yCords.Split("..")[0]);
 			var yMax = int.Parse(yCords.Split("..")[1]);
 
-			var val = Math.Abs(yMin) > (Math.Abs(yMax)) ? yMin : yMax;
+			var possibleX = FindPossibleX(xMin, xMax).Distinct().ToList();
+			var possibleY = FindPossibleY(yMin, yMax).ToList();
 
-			if (val < 0)
+			var results = new List<int>();
+
+			foreach (var posY in possibleY)
 			{
-				val = Math.Abs(val);
-				return ((decimal)(0 + val - 1) / 2) * val;
+				foreach (var posX in possibleX)
+				{
+					if (posX.steps == posY.steps)
+						results.Add(CalculateMaxYPosition(posY.speed, posY.steps));
+				}
 			}
 
-			return ((decimal)(0 + val) / 2) * (val + 1);
+			return results.Max();
 		}
 
 		protected override object SecondTask()
@@ -93,6 +99,22 @@ namespace AoE2021
 			}
 
 			return pos;
+		}
+
+		private int CalculateMaxYPosition(int speed, int stepCount)
+		{
+			var pos = 0;
+			var max = int.MinValue;
+			for (int i = 0; i < stepCount; i++)
+			{
+				pos += speed;
+				speed--;
+
+				if (pos > max)
+					max = pos;
+			}
+
+			return max;
 		}
 
 		private List<(int steps, int speed)> FindPossibleX(int xMin, int xMax)
