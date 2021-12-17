@@ -110,6 +110,7 @@ namespace AoE2021
 
 			(string resultString, long value) ProcessPackage(string s)
 			{
+				var results = new List<long>();
 				var version = s[..3];
 				s = s[3..];
 
@@ -127,14 +128,13 @@ namespace AoE2021
 						if (part.StartsWith('0'))
 							break;
 					}
-					return (s, Convert.ToInt64(z, 2));
+					results.Add(Convert.ToInt64(z, 2));
 				}
 				else
 				{
 					var lengthBit = s[..1];
 					s = s[1..];
 
-					var results = new List<long>();
 					long totalLength;
 					long numberOfSubPackets;
 					if (lengthBit == "0")
@@ -164,19 +164,21 @@ namespace AoE2021
 							results.Add(result.value);
 						}
 					}
-					var res = type switch
-					{
-						"000" => (s, results.Sum()),
-						"001" => (s, results.Aggregate((long)1, (next, curr) => next * curr)),
-						"010" => (s, results.Min()),
-						"011" => (s, results.Max()),
-						"101" => (s, results[0] > results[1] ? 1 : 0),
-						"110" => (s, results[0] > results[1] ? 0 : 1),
-						"111" => (s, results[0] == results[1] ? 1 : 0),
-						_ => throw new Exception()
-					};
-					return res;
 				}
+				var res = type switch
+				{
+					"000" => (s, results.Sum()),
+					"001" => (s, results.Aggregate((long)1, (next, curr) => next * curr)),
+					"010" => (s, results.Min()),
+					"011" => (s, results.Max()),
+					"100" => (s, results.Single()),
+					"101" => (s, results[0] > results[1] ? 1 : 0),
+					"110" => (s, results[0] > results[1] ? 0 : 1),
+					"111" => (s, results[0] == results[1] ? 1 : 0),
+					_ => throw new Exception()
+				};
+				Console.WriteLine($"OP: {type} -- {string.Join(", ", results)}");
+				return res;
 			}
 		}
 
