@@ -20,49 +20,9 @@ namespace AoE2021
 			foreach (var line in lines)
 			{
 				if (x == null)
-					x = line;
+					x = Reduce(line);
 				else
-					x = Add(x, line);
-
-				while (true)
-				{
-					var newText = x;
-					var indexOfNumberToSplit = int.MaxValue;
-					string? numberToSplit = null;
-					var indexOfPairToExplode = int.MaxValue;
-					string? pairToExplode = null;
-					var numbers = Regex.Matches(x, @"\d+");
-					if (numbers.Any(q => q.Length > 1))
-					{
-						numberToSplit = numbers.First(q => q.Length > 1).Value;
-						indexOfNumberToSplit = x.IndexOf(numbers.First(q => q.Length > 1).Value);
-					}
-
-					var matches = Regex.Matches(x, @"\[\d+,\d+\]");
-					foreach (Match match in matches)
-					{
-						var depthOfMatch = GetDepthToIndex(x, match.Index);
-						if (depthOfMatch >= 4)
-						{
-							indexOfPairToExplode = match.Index;
-							pairToExplode = match.Value;
-							break;
-						}
-					}
-
-					if (pairToExplode != null)
-					{
-						newText = Explode(x, pairToExplode, indexOfPairToExplode);
-					}
-					else if (numberToSplit != null)
-					{
-						newText = Split(x, numberToSplit);
-					}
-					if (newText.Length == x.Length)
-						break;
-
-					x = newText;
-				}
+					x = Reduce(Add(x, line));
 			}
 
 			return CalculateMagnitude(x);
@@ -72,7 +32,6 @@ namespace AoE2021
 		{
 			var lines = this._inputLoader.LoadStringListInput();
 			var dict = new Dictionary<string, string>();
-			string x = null;
 			foreach (var line in lines)
 			{
 				dict[line] = Reduce(line);
@@ -139,7 +98,7 @@ namespace AoE2021
 
 		private long CalculateMagnitude(string x)
 		{
-			while (x.Count(r => r == '[' || r == ']') > 0)
+			while (x.Any(r => r == ']' || r == '['))
 			{
 				var matches = Regex.Matches(x, @"\[\d+,\d+\]");
 				foreach (Match match in matches)
