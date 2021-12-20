@@ -97,60 +97,63 @@ namespace AoE2021
 			var sizeY = initMap.Count();
 			var sizeX = initMap[0].Length;
 
-			var map = new char[sizeY, sizeX];
-			for (int i = 0; i < sizeY; i++)
+			var incrY = sizeY + 600;
+			var incrX = sizeX + 600;
+
+			var map = new char[incrY][];
+			for (int i = 0; i < incrY; i++)
 			{
-				for (int j = 0; j < sizeX; j++)
+
+				map[i] = new char[incrX];
+				for (int j = 0; j < incrX; j++)
 				{
-					map[i, j] = initMap[i][j];
+					map[i][j] = '.';
 				}
 			}
-			var oddChar = instr[0];
-			var evenChar = instr[511];
-			map = Resize(map, '.');
-			for (int i = 0; i < map.GetLength(0); i++)
+
+			for (int i = 300; i < sizeY + 300; i++)
 			{
-				for (int j = 0; j < map.GetLength(1); j++)
+				for (int j = 300; j < sizeX + 300; j++)
 				{
-					Console.Write(map[i, j]);
+					map[i][j] = initMap[i - 300][j - 300];
 				}
-				Console.WriteLine();
 			}
-			return "";
-			//for (int z = 0; z < iterations; z++)
-			//{
-			//	var tempArr = new char[incrY][];
-			//	for (int i = 0; i < incrY; i++)
-			//	{
-			//		tempArr[i] = new char[incrX];
-			//		for (int j = 0; j < incrX; j++)
-			//		{
-			//			tempArr[i][j] = '.';
-			//		}
-			//	}
-			//	for (int a = 0; a < incrY - (z + 1) * 3; a++)
-			//	{
-			//		for (int b = 0; b < incrX - (z + 1) * 3; b++)
-			//		{
-			//			var num = map[a].Skip(b).Take(3).ToList();
-			//			num.AddRange(map[a + 1].Skip(b).Take(3));
-			//			num.AddRange(map[a + 2].Skip(b).Take(3));
 
-			//			var integer = GetIntValue(num);
-			//			tempArr[a][b] = instr[integer];
-			//		}
-			//	}
+			for (int z = 0; z < 50; z++)
+			{
+				Console.WriteLine(z);
+				var tempArr = new char[incrY][];
+				for (int i = 0; i < incrY; i++)
+				{
+					tempArr[i] = new char[incrX];
+					for (int j = 0; j < incrX; j++)
+					{
+						tempArr[i][j] = '.';
+					}
+				}
+				for (int a = 0; a < incrY - (z + 1) * 3; a++)
+				{
+					for (int b = 0; b < incrX - (z + 1) * 3; b++)
+					{
+						var num = map[a].Skip(b).Take(3).ToList();
+						num.AddRange(map[a + 1].Skip(b).Take(3));
+						num.AddRange(map[a + 2].Skip(b).Take(3));
 
-			//	for (int a = 0; a < incrY; a++)
-			//	{
-			//		for (int b = 0; b < incrX; b++)
-			//		{
-			//			map[a][b] = tempArr[a][b];
-			//		}
-			//	}
-			//}
+						var integer = GetIntValue(num);
+						tempArr[a][b] = instr[integer];
+					}
+				}
 
-			//return map.Sum(x => x.Count(r => r == '#'));
+				for (int a = 0; a < incrY; a++)
+				{
+					for (int b = 0; b < incrX; b++)
+					{
+						map[a][b] = tempArr[a][b];
+					}
+				}
+			}
+
+			return map.Sum(x => x.Count(r => r == '#'));
 		}
 
 		private char[,] Resize(char[,] map, char defChar)

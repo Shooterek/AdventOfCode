@@ -173,7 +173,7 @@ namespace AoE2021
 					"011" => (s, results.Max()),
 					"100" => (s, results.Single()),
 					"101" => (s, results[0] > results[1] ? 1 : 0),
-					"110" => (s, results[0] > results[1] ? 0 : 1),
+					"110" => (s, results[0] < results[1] ? 1 : 0),
 					"111" => (s, results[0] == results[1] ? 1 : 0),
 					_ => throw new Exception()
 				};

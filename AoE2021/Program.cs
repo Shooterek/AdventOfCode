@@ -4,7 +4,7 @@
     {
         static void Main(string[] args)
         {
-            var day = new Day20();
+            var day = new Day16();
 
             day.RunFirstTask();
             day.RunSecondTask();
