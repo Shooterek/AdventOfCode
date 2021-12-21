@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using AoE2021.Utils;
 
@@ -6,8 +8,20 @@ namespace AoE2021
 {
 	public class Day21 : Day
 	{
+		private Dictionary<int, long> dict;
+
 		public Day21() : base("day21")
 		{
+			this.dict = new()
+			{
+				[3] = 1,
+				[4] = 3,
+				[5] = 6,
+				[6] = 7,
+				[7] = 6,
+				[8] = 3,
+				[9] = 1,
+			};
 		}
 
 		protected override object FirstTask()
@@ -36,8 +50,6 @@ namespace AoE2021
 				p2Score += p2StartPos;
 				currVal = currVal < 0 ? 9 : currVal;
 				dieCounter += 3;
-
-				Console.WriteLine($"P1: {p1Score}, P2: {p2Score}");
 			}
 
 			return Math.Min(p1Score, p2Score) * dieCounter;
@@ -45,7 +57,49 @@ namespace AoE2021
 
 		protected override object SecondTask()
 		{
-			throw new NotImplementedException();
+			var input = this._inputLoader.LoadStringListInput();
+			var p1StartPos = int.Parse(Regex.Matches(input[0], @"\d+")[1].Value);
+			var p2StartPos = int.Parse(Regex.Matches(input[1], @"\d+")[1].Value);
+
+			(var firstWins, var secondWins) = MakeTurn(p1StartPos, p2StartPos, 0, 0, 0, false);
+
+			return $"{firstWins}, {secondWins}";
+		}
+
+		public (long firstWins, long secondWins) MakeTurn(int firstPos, int secondPos, int firstPlayerScore, int secondPlayerScore, int addedValue, bool isFirstPlayersTurn)
+		{
+			if (isFirstPlayersTurn)
+			{
+				firstPos += addedValue;
+				firstPos = firstPos > 10 ? firstPos % 10 : firstPos;
+
+				firstPlayerScore += firstPos;
+
+				if (firstPlayerScore >= 21)
+					return (1, 0);
+			}
+			else
+			{
+				secondPos += addedValue;
+				secondPos = secondPos > 10 ? secondPos % 10 : secondPos;
+
+				secondPlayerScore += secondPos;
+
+				if (secondPlayerScore >= 21)
+					return (0, 1);
+			}
+
+			long firstScore = 0;
+			long secondScore = 0;
+
+			for (int i = 3; i < 10; i++)
+			{
+				(var f1, var f2) = MakeTurn(firstPos, secondPos, firstPlayerScore, secondPlayerScore, i, !isFirstPlayersTurn);
+				firstScore += this.dict[i] * f1;
+				secondScore += this.dict[i] * f2;
+			}
+
+			return (firstScore, secondScore);
 		}
 	}
 }
