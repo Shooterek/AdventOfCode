@@ -6,11 +6,11 @@ namespace AoE2021
 {
 	public class Day24 : Day
 	{
-		private List<long> addX;
-		private List<long> divZ;
-		private List<long> addY;
+		private List<long> xValues;
+		private List<long> zValues;
+		private List<long> yValues;
 		private Dictionary<(int, long), List<string>> cache;
-		private List<long> maxZAtStep;
+		private List<long> zBoundaries;
 
 		public Day24() : base("day24")
 		{
@@ -19,21 +19,21 @@ namespace AoE2021
 		protected override object FirstTask()
 		{
 			this.cache = new();
-			this.maxZAtStep = new();
-			this.addX = new();
-			this.addY = new();
-			this.divZ = new();
+			this.zBoundaries = new();
+			this.xValues = new();
+			this.yValues = new();
+			this.zValues = new();
 			var lines = this._inputLoader.LoadStringListInput();
 
 			for (int i = 0; i < 14; i++)
 			{
-				this.divZ.Add(int.Parse(lines[(18 * i) + 4].Split()[2]));
-				this.addX.Add(int.Parse(lines[(18 * i) + 5].Split()[2]));
-				this.addY.Add(int.Parse(lines[(18 * i) + 15].Split()[2]));
+				this.zValues.Add(int.Parse(lines[(18 * i) + 4].Split()[2]));
+				this.xValues.Add(int.Parse(lines[(18 * i) + 5].Split()[2]));
+				this.yValues.Add(int.Parse(lines[(18 * i) + 15].Split()[2]));
 			}
-			for (int i = 0; i < this.divZ.Count; i++)
+			for (int i = 0; i < this.zValues.Count; i++)
 			{
-				this.maxZAtStep.Add(this.divZ.Skip(i).Aggregate(1L, (a, b) => a * b));
+				this.zBoundaries.Add(this.zValues.Skip(i).Aggregate(1L, (a, b) => a * b));
 			}
 
 			var ids = RunGroupsRecursivly(0, 0);
@@ -43,24 +43,22 @@ namespace AoE2021
 		protected override object SecondTask()
 		{
 			this.cache = new();
-			this.maxZAtStep = new();
-			this.addX = new();
-			this.addY = new();
-			this.divZ = new();
+			this.zBoundaries = new();
+			this.xValues = new();
+			this.yValues = new();
+			this.zValues = new();
 			var lines = this._inputLoader.LoadStringListInput();
 
 			for (int i = 0; i < 14; i++)
 			{
-				this.divZ.Add(int.Parse(lines[(18 * i) + 4].Split()[2]));
-				this.addX.Add(int.Parse(lines[(18 * i) + 5].Split()[2]));
-				this.addY.Add(int.Parse(lines[(18 * i) + 15].Split()[2]));
+				this.zValues.Add(int.Parse(lines[(18 * i) + 4].Split()[2]));
+				this.xValues.Add(int.Parse(lines[(18 * i) + 5].Split()[2]));
+				this.yValues.Add(int.Parse(lines[(18 * i) + 15].Split()[2]));
 			}
 
-			this.cache = new();
-			this.maxZAtStep = new();
-			for (int i = 0; i < this.divZ.Count; i++)
+			for (int i = 0; i < this.zValues.Count; i++)
 			{
-				this.maxZAtStep.Add(this.divZ.Skip(i).Aggregate(1L, (a, b) => a * b));
+				this.zBoundaries.Add(this.zValues.Skip(i).Aggregate(1L, (a, b) => a * b));
 			}
 
 			var ids = RunGroupsRecursivly(0, 0);
@@ -79,10 +77,10 @@ namespace AoE2021
 
 				return Enumerable.Empty<string>().ToList();
 			}
-			if (prevZ > this.maxZAtStep[groupNum])
+			if (prevZ > this.zBoundaries[groupNum])
 				return Enumerable.Empty<string>().ToList();
 
-			long nextX = this.addX[groupNum] + prevZ % 26;
+			long nextX = this.xValues[groupNum] + prevZ % 26;
 			long nextZ;
 			List<string> newValues = new();
 			if (nextX > 0 && nextX < 10)
@@ -105,12 +103,12 @@ namespace AoE2021
 
 		private long RunSingleGroup(int groupNum, long z, long input)
 		{
-			long x = this.addX[groupNum] + z % 26;
-			z /= this.divZ[groupNum];
+			long x = this.xValues[groupNum] + z % 26;
+			z /= this.zValues[groupNum];
 			if (x != input)
 			{
 				z *= 26;
-				z += input + this.addY[groupNum];
+				z += input + this.yValues[groupNum];
 			}
 
 			return z;
