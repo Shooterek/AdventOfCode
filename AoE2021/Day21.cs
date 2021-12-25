@@ -60,10 +60,17 @@ namespace AoE2021
 			var input = this._inputLoader.LoadStringListInput();
 			var p1StartPos = int.Parse(Regex.Matches(input[0], @"\d+")[1].Value);
 			var p2StartPos = int.Parse(Regex.Matches(input[1], @"\d+")[1].Value);
+			long f1 = 0;
+			long f2 = 0;
 
-			(var firstWins, var secondWins) = MakeTurn(p1StartPos, p2StartPos, 0, 0, 0, false);
+			for (int i = 3; i < 10; i++)
+			{
+				(var firstWins, var secondWins) = MakeTurn(p1StartPos, p2StartPos, 0, 0, i, true);
+				f1 += firstWins * this.dict[i];
+				f2 += secondWins * this.dict[i];
+			}
 
-			return $"{firstWins}, {secondWins}";
+			return Math.Max(f1, f2);
 		}
 
 		public (long firstWins, long secondWins) MakeTurn(int firstPos, int secondPos, int firstPlayerScore, int secondPlayerScore, int addedValue, bool isFirstPlayersTurn)
