@@ -1,199 +1,119 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using AoE2021.Utils;
 
 namespace AoE2021
 {
 	public class Day24 : Day
 	{
-		private List<(int index, List<string> instructions)> instrGroups = new();
+		private List<long> addX;
+		private List<long> divZ;
+		private List<long> addY;
+		private Dictionary<(int, long), List<string>> cache;
+		private List<long> maxZAtStep;
+
 		public Day24() : base("day24")
 		{
 		}
 
 		protected override object FirstTask()
 		{
-			var input = this._inputLoader.LoadStringListInput();
+			this.cache = new();
+			this.maxZAtStep = new();
+			this.addX = new();
+			this.addY = new();
+			this.divZ = new();
+			var lines = this._inputLoader.LoadStringListInput();
 
-			var x = input.Select((item, index) => item.Contains("inp") ? index : null as int?).OfType<int>().ToList();
-			for (int i = 0; i < x.Count; i++)
+			for (int i = 0; i < 14; i++)
 			{
-				if (i < x.Count - 1)
-					this.instrGroups.Add((i, input.Skip(x[i] + 1).Take(x[i + 1] - x[i] - 1).ToList()));
-				else
-					this.instrGroups.Add((i, input.Skip(x[i] + 1).Take(input.Count - x[i] - 1).ToList()));
+				this.divZ.Add(int.Parse(lines[(18 * i) + 4].Split()[2]));
+				this.addX.Add(int.Parse(lines[(18 * i) + 5].Split()[2]));
+				this.addY.Add(int.Parse(lines[(18 * i) + 15].Split()[2]));
+			}
+			for (int i = 0; i < this.divZ.Count; i++)
+			{
+				this.maxZAtStep.Add(this.divZ.Skip(i).Aggregate(1L, (a, b) => a * b));
 			}
 
-			var values = new List<long>();
-			var cache = new List<(int, int)>();
-
-			Apply("", 0, 0);
-
-			return "";
-
-			void Apply(string number, int index, byte z)
-			{
-				if (index == this.instrGroups.Count)
-				{
-					var x = long.Parse(number);
-					values.Add(x);
-					Console.WriteLine(x);
-					return;
-				}
-
-				var instr = this.instrGroups.First(x => x.index == index).instructions;
-				for (byte i = 9; i > 0; i--)
-				{
-					var output = GetValue(instr, z, i);
-
-					if (cache.Contains((i, output)))
-					{
-						return;
-					}
-
-					Apply($"{number}{i}", index + 1, output);
-					cache.Add((i, output));
-				}
-			}
+			var ids = RunGroupsRecursivly(0, 0);
+			return ids.Max();
 		}
 
 		protected override object SecondTask()
 		{
-			return "";
+			this.cache = new();
+			this.maxZAtStep = new();
+			this.addX = new();
+			this.addY = new();
+			this.divZ = new();
+			var lines = this._inputLoader.LoadStringListInput();
+
+			for (int i = 0; i < 14; i++)
+			{
+				this.divZ.Add(int.Parse(lines[(18 * i) + 4].Split()[2]));
+				this.addX.Add(int.Parse(lines[(18 * i) + 5].Split()[2]));
+				this.addY.Add(int.Parse(lines[(18 * i) + 15].Split()[2]));
+			}
+
+			this.cache = new();
+			this.maxZAtStep = new();
+			for (int i = 0; i < this.divZ.Count; i++)
+			{
+				this.maxZAtStep.Add(this.divZ.Skip(i).Aggregate(1L, (a, b) => a * b));
+			}
+
+			var ids = RunGroupsRecursivly(0, 0);
+			return ids.Min();
 		}
 
-		private byte GetValue(List<string> instr, int z, int w)
+		private List<string> RunGroupsRecursivly(int groupNum, long prevZ)
 		{
-			var x = 0;
-			var y = 0;
-			foreach (var inst in instr)
+			if (this.cache.ContainsKey((groupNum, prevZ)))
+				return this.cache[(groupNum, prevZ)];
+
+			if (groupNum >= 14)
 			{
-				if (inst.Contains("mul"))
+				if (prevZ == 0)
+					return new List<string>() { "" };
+
+				return Enumerable.Empty<string>().ToList();
+			}
+			if (prevZ > this.maxZAtStep[groupNum])
+				return Enumerable.Empty<string>().ToList();
+
+			long nextX = this.addX[groupNum] + prevZ % 26;
+			long nextZ;
+			List<string> newValues = new();
+			if (nextX > 0 && nextX < 10)
+			{
+				nextZ = RunSingleGroup(groupNum, prevZ, nextX);
+				newValues.AddRange(RunGroupsRecursivly(groupNum + 1, nextZ).Select(x => $"{nextX}{x}").ToList());
+			}
+			else
+			{
+				foreach (int i in Enumerable.Range(1, 9))
 				{
-					var split = inst.Split(" ");
-					var src = split[2];
-
-					var srcValue = src switch
-					{
-						"z" => z,
-						"w" => w,
-						"x" => x,
-						"y" => y,
-						_ => int.Parse(src),
-					};
-
-					var dest = inst.Split(" ")[1];
-					if (dest == "z")
-						z *= srcValue;
-					if (dest == "y")
-						y *= srcValue;
-					if (dest == "x")
-						x *= srcValue;
-					if (dest == "w")
-						w *= srcValue;
-				}
-				else if (inst.Contains("add"))
-				{
-					var split = inst.Split(" ");
-					var src = split[2];
-
-					var srcValue = src switch
-					{
-						"z" => z,
-						"w" => w,
-						"x" => x,
-						"y" => y,
-						_ => int.Parse(src),
-					};
-
-					var dest = split[1];
-					if (dest == "z")
-						z += srcValue;
-					if (dest == "y")
-						y += srcValue;
-					if (dest == "x")
-						x += srcValue;
-					if (dest == "w")
-						w += srcValue;
-				}
-				else if (inst.Contains("div"))
-				{
-					var split = inst.Split(" ");
-					var src = split[2];
-
-					var srcValue = src switch
-					{
-						"z" => z,
-						"w" => w,
-						"x" => x,
-						"y" => y,
-						_ => int.Parse(src),
-					};
-
-					var dest = split[1];
-					if (dest == "z")
-						z /= srcValue;
-					if (dest == "y")
-						y /= srcValue;
-					if (dest == "x")
-						x /= srcValue;
-					if (dest == "w")
-						w /= srcValue;
-				}
-				else if (inst.Contains("mod"))
-				{
-					var split = inst.Split(" ");
-					var src = split[2];
-
-					var srcValue = src switch
-					{
-						"z" => z,
-						"w" => w,
-						"x" => x,
-						"y" => y,
-						_ => int.Parse(src),
-					};
-
-					var dest = split[1];
-					if (dest == "z")
-						z %= srcValue;
-					if (dest == "y")
-						y %= srcValue;
-					if (dest == "x")
-						x %= srcValue;
-					if (dest == "w")
-						w %= srcValue;
-				}
-				else if (inst.Contains("eql"))
-				{
-					var split = inst.Split(" ");
-					var src = split[2];
-
-					var srcValue = src switch
-					{
-						"z" => z,
-						"w" => w,
-						"x" => x,
-						"y" => y,
-						_ => int.Parse(src),
-					};
-
-					var dest = split[1];
-					if (dest == "z")
-						z = z == srcValue ? 1 : 0;
-					if (dest == "y")
-						y = y == srcValue ? 1 : 0;
-					if (dest == "x")
-						x = x == srcValue ? 1 : 0;
-					if (dest == "w")
-						w = w == srcValue ? 1 : 0;
+					nextZ = RunSingleGroup(groupNum, prevZ, i);
+					newValues.AddRange(RunGroupsRecursivly(groupNum + 1, nextZ).Select(x => $"{i}{x}").ToList());
 				}
 			}
 
-			return (byte)z;
+			this.cache[(groupNum, prevZ)] = newValues;
+			return newValues;
+		}
+
+		private long RunSingleGroup(int groupNum, long z, long input)
+		{
+			long x = this.addX[groupNum] + z % 26;
+			z /= this.divZ[groupNum];
+			if (x != input)
+			{
+				z *= 26;
+				z += input + this.addY[groupNum];
+			}
+
+			return z;
 		}
 	}
 }
