@@ -9,7 +9,7 @@ internal class Program
     private static void Main(string[] args)
     {
         var currentDay = DateTime.Now.Day;
-        var day = new Day2();
+        var day = new Day4();
         day.LoadInput();
 
         day.RunFirstTask();
