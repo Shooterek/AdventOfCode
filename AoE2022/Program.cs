@@ -1,20 +1,14 @@
-﻿using AoE2022.Utils;
-using System;
-using System.Reflection;
-
-namespace AoE2022;
+﻿namespace AoE2022;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
         var currentDay = DateTime.Now.Day;
-        var day = new Day4();
-        day.LoadInput();
+        var day = (Day)Activator.CreateInstance(null, $"Day{currentDay}").Unwrap();
 
         day.RunFirstTask();
 
-        day.LoadInput();
         day.RunSecondTask();
     }
 }
