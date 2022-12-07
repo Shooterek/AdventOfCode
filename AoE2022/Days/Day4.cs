@@ -4,33 +4,36 @@ public class Day4 : StringListDay
 {
     protected override object FirstTask()
     {
-        return this.Input.Sum(l => {
-            var elfs = l.Split(",");
-            var elf1 = elfs[0].Split("-").Select(int.Parse).ToArray();
-            var elf2 = elfs[1].Split("-").Select(int.Parse).ToArray();
+        return this.Input.Count(l =>
+        {
+            var elfs = l.Split(",").Select(r => new ElfRange(r)).ToArray();
 
-            return (elf1, elf2) switch {
-                ([int e11, int e12], [int e21, int e22]) when e22 >= e12 && e21 <= e11 => 1,
-                ([int e11, int e12], [int e21, int e22]) when e12 >= e22 && e11 <= e21 => 1,
-                (_, _) => 0,
-            };
+            return elfs[0].Contains(elfs[1]) || elfs[1].Contains(elfs[0]);
         });
     }
 
     protected override object SecondTask()
     {
-        return this.Input.Sum(l => {
-            var elfs = l.Split(",");
-            var elf1 = elfs[0].Split("-").Select(int.Parse).ToArray();
-            var elf2 = elfs[1].Split("-").Select(int.Parse).ToArray();
+        return this.Input.Count(l =>
+        {
+            var elfs = l.Split(",").Select(r => new ElfRange(r)).ToArray();
 
-            return (elf1, elf2) switch {
-                ([int e11, int e12], [int e21, int e22]) when e11 >= e21 && e11 <= e22 => 1,
-                ([int e11, int e12], [int e21, int e22]) when e12 >= e21 && e12 <= e22 => 1,
-                ([int e11, int e12], [int e21, int e22]) when e21 >= e11 && e21 <= e12 => 1,
-                ([int e11, int e12], [int e21, int e22]) when e22 >= e11 && e22 <= e12 => 1,
-                (_, _) => 0,
-            };
+            return elfs[0].Overlap(elfs[1]);
         });
+    }
+
+    private record ElfRange
+    {
+        public ElfRange(string range)
+        {
+            var numbers = range.Split("-").Select(int.Parse).ToArray();
+            this.Start = numbers[0];
+            this.End = numbers[1];
+        }
+        public int Start { get; set; }
+        public int End { get; set; }
+
+        public bool Contains(ElfRange elf2) => this.Start <= elf2.Start && this.End >= elf2.End;
+        public bool Overlap(ElfRange elf2) => (this.Start <= elf2.End && this.End >= elf2.Start) || (elf2.Start <= this.End && elf2.End >= this.Start);
     }
 }
