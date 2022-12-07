@@ -52,15 +52,13 @@ public class Day7 : StringListDay
         return null;
     }
 
-    private object Expand(Directory current, string target) {
+    private object? Expand(Directory current, string target) {
         current.Objects.TryAdd(target, new Directory() { Parent = current });
-
         return null;
     }
 
     private object Expand(Directory current, string target, int size) {
         current.Objects.TryAdd(target, new File() { Size = size });
-
         return null;
     }
 
