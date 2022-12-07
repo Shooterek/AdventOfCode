@@ -1,32 +1,24 @@
 using AoE2022.Utils;
 
-public class Day6 : StringListDay
+public class Day6 : EntireStringDay
 {
     protected override object FirstTask()
     {
-        const int DistinctChars = 4;
-        return this.Input.Sum(l => {
-            for (int i = 0; i < l.Length; i++)
-            {
-                if (l.Substring(i, DistinctChars).Distinct().Count() == DistinctChars)
-                    return i + DistinctChars;
-            }
-
-            throw new Exception();
-        });
+        return CountProcessedCharacters(this.Input, 4);
     }
 
     protected override object SecondTask()
     {
-        const int DistinctChars = 14;
-        return this.Input.Sum(l => {
-            for (int i = 0; i < l.Length; i++)
-            {
-                if (l.Substring(i, DistinctChars).Distinct().Count() == DistinctChars)
-                    return i + DistinctChars;
-            }
+        return CountProcessedCharacters(this.Input, 14);
+    }
 
-            throw new Exception();
-        });
+    private int CountProcessedCharacters(string source, int distinctChars) {
+        for (int i = 0; i < source.Length; i++)
+        {
+            if (source.Substring(i, distinctChars).Distinct().Count() == distinctChars)
+                return i + distinctChars;
+        }
+
+        throw new Exception();
     }
 }
