@@ -62,6 +62,10 @@ public class Day9 : StringListDay
                     var tail = rope[i];
                     (var x, var y) = ((head.X - tail.X), (head.Y - tail.Y)) switch
                     {
+                        (2, 2) => (head.X - 1, head.Y - 1),
+                        (-2, -2) => (head.X + 1, head.Y + 1),
+                        (2, -2) => (head.X - 1, head.Y + 1),
+                        (-2, 2) => (head.X + 1, head.Y - 1),
                         (2, _) => (head.X - 1, head.Y),
                         (-2, _) => (head.X + 1, head.Y),
                         (_, 2) => (head.X, head.Y - 1),
