@@ -60,7 +60,7 @@ public class Day10 : StringListDay
             Console.WriteLine();
         }
 
-        return null;
+        return string.Empty;
 
         void Tick(int valToAdd) {
             var pos = cycle;
