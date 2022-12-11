@@ -50,13 +50,7 @@ public class Day11 : StringBatchesDay
             var falseMonkey = int.Parse(NumberPattern.Match(lines[5]).Captures[0].Value);
             monkeys[monkeyNumber] = new Monkey(items.ToList(), divisibleBy, trueMonkey, falseMonkey, operation, operationValue, false);
         }
-
-        foreach (var monkey in monkeys) {
-            monkeys[monkey.Key] = monkey.Value with { Items = new() };
-        }
-
-        monkeys[0] = monkeys[0] with { Items = new List<int>() {79} };
-
+        
         for (int i = 0; i < 200; i++)
         {
             for (int j = 0; j < monkeys.Count(); j++)
@@ -67,12 +61,9 @@ public class Day11 : StringBatchesDay
                 }
                 monkeys[j] = monkeys[j] with { Items = new() };
             }
-
-            var x = monkeys.SelectMany(m => m.Value.Items);
-            Console.WriteLine(x);
         }
 
-        return monkeys.Select(m => m.Value).OrderByDescending(m => m.InspectedItems).Take(2).Aggregate(1f, (current, next) => current * next.InspectedItems);
+        return monkeys.Select(m => m.Value).OrderByDescending(m => m.InspectedItems).Take(2).Aggregate(1, (current, next) => current * next.InspectedItems);
     }
 
     private record Monkey(List<int> Items, int DivisibleBy, int MonkeyTrue, int MonkeyFalse, Operation Operation, int? OperationValue, bool Worry = true) {
