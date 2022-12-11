@@ -8,7 +8,8 @@ public class Day11 : StringBatchesDay
     {
         var monkeys = new Dictionary<long, Monkey>();
 
-        foreach (var batch in this.Input) {
+        foreach (var batch in this.Input)
+        {
             var lines = batch.Split("\r ");
             var monkeyNumber = long.Parse(NumberPattern.Match(lines[0]).Captures[0].Value);
             var items = NumberPattern.Matches(lines[1]).Select(c => long.Parse(c.Captures[0].Value));
@@ -24,7 +25,8 @@ public class Day11 : StringBatchesDay
         {
             for (long j = 0; j < monkeys.Count(); j++)
             {
-                foreach ((var target, var item) in monkeys[j].InspectItems()) {
+                foreach ((var target, var item) in monkeys[j].InspectItems())
+                {
                     monkeys[target].Items.Add(item);
                 }
 
@@ -32,14 +34,18 @@ public class Day11 : StringBatchesDay
             }
         }
 
-        return monkeys.Select(m => m.Value).OrderByDescending(m => m.InspectedItems).Take(2).Aggregate(1L, (current, next) => current * next.InspectedItems);
+        return monkeys
+            .OrderByDescending(m => m.Value.InspectedItems)
+            .Take(2)
+            .Aggregate(1L, (current, next) => current * next.Value.InspectedItems);
     }
 
     protected override object SecondTask()
     {
         var monkeys = new Dictionary<long, Monkey>();
 
-        foreach (var batch in this.Input) {
+        foreach (var batch in this.Input)
+        {
             var lines = batch.Split("\r ");
             var monkeyNumber = long.Parse(NumberPattern.Match(lines[0]).Captures[0].Value);
             var items = NumberPattern.Matches(lines[1]).Select(c => long.Parse(c.Captures[0].Value));
@@ -57,17 +63,22 @@ public class Day11 : StringBatchesDay
             for (long j = 0; j < monkeys.Count(); j++)
             {
                 var moves = monkeys[j].InspectItems();
-                foreach ((var target, var item) in moves) {
+                foreach ((var target, var item) in moves)
+                {
                     monkeys[target].Items.Add(item % lcm);
                 }
                 monkeys[j] = monkeys[j] with { Items = new() };
             }
         }
 
-        return monkeys.Select(m => m.Value).OrderByDescending(m => m.InspectedItems).Take(2).Aggregate(1L, (current, next) => current * next.InspectedItems);
+        return monkeys
+            .OrderByDescending(m => m.Value.InspectedItems)
+            .Take(2)
+            .Aggregate(1L, (current, next) => current * next.Value.InspectedItems);
     }
 
-    private record Monkey(List<long> Items, int DivisibleBy, long MonkeyTrue, long MonkeyFalse, Operation Operation, long? OperationValue, bool Worry = true) {
+    private record Monkey(List<long> Items, int DivisibleBy, long MonkeyTrue, long MonkeyFalse, Operation Operation, long? OperationValue, bool Worry = true)
+    {
         public long InspectedItems { get; private set; }
         public List<(long target, long item)> InspectItems()
         {
