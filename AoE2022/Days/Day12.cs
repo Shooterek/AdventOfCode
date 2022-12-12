@@ -3,7 +3,8 @@ using AoE2022.Utils;
 
 public class Day12 : StringListDay
 {
-    private List<(int, int)> ind = new(){
+    private List<(int, int)> ind = new()
+    {
         (-1, 0),
         (1, 0),
         (0, 1),
@@ -49,11 +50,13 @@ public class Day12 : StringListDay
         return count;
     }
 
-    private record Point(int X, int Y, int Height, char Letter) {
+    private record Point(int X, int Y, int Height, char Letter)
+    {
         public bool Reached { get; set; } = false;
     }
 
-    private int GetValue(char c) {
+    private int GetValue(char c)
+    {
         var val = c switch {
             'S' => 'a',
             'E' => 'z',
@@ -62,17 +65,19 @@ public class Day12 : StringListDay
         return Convert.ToInt32(val);
     }
 
-    private List<Point> GetNeighbours(Point p, Point[][] map) {
-        var stack = new List<Point>();
-        foreach (var i in this.ind) {
+    private List<Point> GetNeighbours(Point p, Point[][] map)
+    {
+        var list = new List<Point>();
+        foreach (var i in this.ind)
+        {
             if (p.X + i.Item1 >= map[0].Length || p.X + i.Item1 < 0 || p.Y + i.Item2 >= map.Length || p.Y + i.Item2 < 0)
-            continue;
+                continue;
 
             var point = map[p.Y + i.Item2][p.X + i.Item1];
             if (point.Height <= p.Height + 1 && !point.Reached)
-                stack.Add(point);
+                list.Add(point);
         }
 
-        return stack;
+        return list;
     }
 }
