@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using AoE2022.Utils;
 
 public class Day12 : StringListDay
