@@ -93,9 +93,9 @@ public class Day13 : StringBatchesDay
             result = (leftValue, rightValue) switch
             {
                 (ArrayValue l, ArrayValue r) => l.Compare(r),
+                (ArrayValue l, int r) => l.Compare(new ArrayValue(r)),
+                (int l, ArrayValue r) => new ArrayValue(l).Compare(r),
                 (int l, int r) => Compare(l, r),
-                (ArrayValue l, int r) => Compare(l, r),
-                (int l, ArrayValue r) => Compare(l, r),
             };
         }
 
@@ -111,17 +111,7 @@ public class Day13 : StringBatchesDay
 
         return 0;
     }
-
-    private int Compare(ArrayValue left, int right)
-    {
-        return left.Compare(new ArrayValue(right));
-    }
-
-    private int Compare(int left, ArrayValue right)
-    {
-        return new ArrayValue(left).Compare(right);
-    }
-    }
+}
 
     private class Comparer : IComparer<string>
     {
