@@ -4,6 +4,7 @@ using AoE2022.Utils;
 public class Day13 : StringBatchesDay
 {
     private static Regex NumberPattern = new Regex(@"\d+");
+    
     protected override object FirstTask()
     {
         return this.Input.Select((batch, index) =>
@@ -74,44 +75,42 @@ public class Day13 : StringBatchesDay
 
         public Queue<object> Values { get; set; } = new();
 
-        
-
-    public int Compare(ArrayValue right)
-    {
-        var result = 0;
-        while (result == 0)
+        public int Compare(ArrayValue right)
         {
-            var leftOk = this.Values.TryDequeue(out var leftValue);
-            var rightOk = right.Values.TryDequeue(out var rightValue);
-            if (!leftOk && rightOk)
-                return 1;
-            if (leftOk && !rightOk)
-                return -1;
-            if (!leftOk && !rightOk)
-                return 0;
-
-            result = (leftValue, rightValue) switch
+            var result = 0;
+            while (result == 0)
             {
-                (ArrayValue l, ArrayValue r) => l.Compare(r),
-                (ArrayValue l, int r) => l.Compare(new ArrayValue(r)),
-                (int l, ArrayValue r) => new ArrayValue(l).Compare(r),
-                (int l, int r) => Compare(l, r),
-            };
+                var leftOk = this.Values.TryDequeue(out var leftValue);
+                var rightOk = right.Values.TryDequeue(out var rightValue);
+                if (!leftOk && rightOk)
+                    return 1;
+                if (leftOk && !rightOk)
+                    return -1;
+                if (!leftOk && !rightOk)
+                    return 0;
+
+                result = (leftValue, rightValue) switch
+                {
+                    (ArrayValue l, ArrayValue r) => l.Compare(r),
+                    (ArrayValue l, int r) => l.Compare(new ArrayValue(r)),
+                    (int l, ArrayValue r) => new ArrayValue(l).Compare(r),
+                    (int l, int r) => Compare(l, r),
+                };
+            }
+
+            return result;
         }
 
-        return result;
-    }
+        private int Compare(int left, int right)
+        {
+            if (left < right)
+                return 1;
+            if (right < left)
+                return -1;
 
-    private int Compare(int left, int right)
-    {
-        if (left < right)
-            return 1;
-        if (right < left)
-            return -1;
-
-        return 0;
+            return 0;
+        }
     }
-}
 
     private class Comparer : IComparer<string>
     {
