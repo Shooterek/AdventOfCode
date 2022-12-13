@@ -11,7 +11,7 @@ public class Day13 : StringBatchesDay
             var left = new ArrayValue(batch.Split("\r ")[0]);
             var right = new ArrayValue(batch.Split("\r ")[1]);
             
-            var r = CompareArrays(left, right);
+            var r = left.Compare(right);
             return r == 1 ? index + 1 : 0;
         }).Sum();
     }
@@ -20,31 +20,25 @@ public class Day13 : StringBatchesDay
     {
         var start = "[[2]]";
         var end = "[[6]]";
-        var correctPackets = this.Input
+        var allPackets = this.Input
             .SelectMany(b => b.Split("\r "))
             .ToList();
 
-        correctPackets.Add(start);
-        correctPackets.Add(end);
+        allPackets.Add(start);
+        allPackets.Add(end);
 
-        correctPackets = correctPackets.OrderDescending(new Comparer()).ToList();
+        allPackets = allPackets.OrderDescending(new Comparer()).ToList();
 
-        return (correctPackets.FindIndex(p => p == start) + 1) * (correctPackets.FindIndex(p => p == end) + 1);
-    }
-
-    private class Comparer : IComparer<string>
-    {
-        public int Compare(string? x, string? y)
-        {
-            return CompareArrays(new ArrayValue(x), new ArrayValue(y));
-        }
+        return (allPackets.FindIndex(p => p == start) + 1) * (allPackets.FindIndex(p => p == end) + 1);
     }
 
     private class ArrayValue
     {
-        public ArrayValue(int i) {
+        public ArrayValue(int i)
+        {
             this.Values.Enqueue(i);
         }
+
         public ArrayValue(string array)
         {
             var val = array[1..^1];
@@ -79,13 +73,15 @@ public class Day13 : StringBatchesDay
         }
 
         public Queue<object> Values { get; set; } = new();
-    }
 
-    private static int CompareArrays(ArrayValue left, ArrayValue right) {
+        
+
+    public int Compare(ArrayValue right)
+    {
         var result = 0;
         while (result == 0)
         {
-            var leftOk = left.Values.TryDequeue(out var leftValue);
+            var leftOk = this.Values.TryDequeue(out var leftValue);
             var rightOk = right.Values.TryDequeue(out var rightValue);
             if (!leftOk && rightOk)
                 return 1;
@@ -94,8 +90,9 @@ public class Day13 : StringBatchesDay
             if (!leftOk && !rightOk)
                 return 0;
 
-            result = (leftValue, rightValue) switch {
-                (ArrayValue l, ArrayValue r) => CompareArrays(l, r),
+            result = (leftValue, rightValue) switch
+            {
+                (ArrayValue l, ArrayValue r) => l.Compare(r),
                 (int l, int r) => Compare(l, r),
                 (ArrayValue l, int r) => Compare(l, r),
                 (int l, ArrayValue r) => Compare(l, r),
@@ -105,7 +102,8 @@ public class Day13 : StringBatchesDay
         return result;
     }
 
-    private static int Compare(int left, int right) {
+    private int Compare(int left, int right)
+    {
         if (left < right)
             return 1;
         if (right < left)
@@ -114,11 +112,19 @@ public class Day13 : StringBatchesDay
         return 0;
     }
 
-    private static int Compare(ArrayValue left, int right) {
-        return CompareArrays(left, new ArrayValue(right));
+    private int Compare(ArrayValue left, int right)
+    {
+        return left.Compare(new ArrayValue(right));
     }
 
-    private static int Compare(int left, ArrayValue right) {
-        return CompareArrays(new ArrayValue(left), right);
+    private int Compare(int left, ArrayValue right)
+    {
+        return new ArrayValue(left).Compare(right);
+    }
+    }
+
+    private class Comparer : IComparer<string>
+    {
+        public int Compare(string? x, string? y) => new ArrayValue(x).Compare(new ArrayValue(y));
     }
 }
