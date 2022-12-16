@@ -39,7 +39,8 @@ public class Day15 : StringListDay
         }
 
         var result = 0;
-        foreach ((var start, var end) in x) {
+        foreach ((var start, var end) in x)
+        {
             result += end - start;
         }
 
@@ -48,51 +49,13 @@ public class Day15 : StringListDay
 
     protected override object SecondTask()
     {
-        var min = 0;
-        var max = 20;
-        //var max = 4_000_000;
-        var sensorRanges = new List<SensorRange>();
-        var ranges = new List<(int, int)>();
-        foreach (var line in this.Input)
+        for (int i = 0; i < 4_000_000; i++)
         {
-            var n = NumberPattern.Matches(line).Select(m => m.Captures[0].Value).Select(int.Parse).ToList();
-            var station = new Point(n[0], n[1]);
-            var distance = ManhattanDistance(n[0], n[1], n[2], n[3]);
-            sensorRanges.Add(new(n[0] - distance, n[0] + distance, n[1] - distance, n[1] + distance, n[0], n[1], distance));
-        }
-
-        var ys = sensorRanges.SelectMany(r => new int[] {r.Y1, r.Y2}).Order().ToList();
-        var xs = sensorRanges.SelectMany(r => new int[] {r.X1, r.X2}).Order().ToList();
-        var map = new bool[ys.Count][];
-        for (int i = 0; i < map.Length; i++)
-        {
-            map[i] = new bool[map.Length];
-        }
-
-        for (int i = 0; i < ys.Count; i++)
-        {
-            for (int j = 0; j < xs.Count; j++)
-            {
-                var val1 = ys[i];
-                var val2 = xs[j];
-
-                var res = sensorRanges.FirstOrDefault(r => {
-                    return ManhattanDistance(r.X3, r.Y3, val1, val2) <= r.Dist;
-                });
-                map[i][j] = sensorRanges.Any(r => {
-                    return ManhattanDistance(r.X3, r.Y3, val1, val2) <= r.Dist;
-                });
+            if (i % 10_000 == 0) {
+                Console.WriteLine(i);
             }
-        }
-
-        
-        for (int i = 0; i < ys.Count; i++)
-        {
-            for (int j = 0; j < xs.Count; j++)
-            {
-                if (map[i][j] == false && ys[i] >= 0 && ys[i] <= max && xs[j] >= 0 && xs[j] <= max)
-                    Console.WriteLine($"{ys[i]} {xs[j]}");
-                    // Console.WriteLine($"{(double)ys[i] * 4_000_000 + xs[j]}");
+            if (GetBusySquares(i) == 4_000_000) {
+                Console.WriteLine(i);
             }
         }
 
@@ -106,5 +69,66 @@ public class Day15 : StringListDay
     private int ManhattanDistance(int x1, int y1, int x2, int y2)
     {
         return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
+    }
+
+    private int GetBusySquares(int targetLine)
+    {
+        var ranges = new List<(int, int)>();
+        foreach (var line in this.Input)
+        {
+            var n = NumberPattern.Matches(line).Select(m => m.Captures[0].Value).Select(int.Parse).ToList();
+            var station = new Point(n[0], n[1]);
+            var distance = ManhattanDistance(n[0], n[1], n[2], n[3]);
+
+            var distanceToTargetLine = Math.Abs(station.Y - targetLine);
+            if (distanceToTargetLine > distance)
+                continue;
+
+            var sideLength = distance - distanceToTargetLine;
+            ranges.Add((station.X - sideLength, station.X + sideLength));
+        }
+        var index = 0;
+        while (index < ranges.Count) {
+            if (ranges[index].Item1 < 0 && ranges[index].Item2 < 0)
+                ranges[index] = (0,0);
+
+            if (ranges[index].Item1 > 4_000_000 && ranges[index].Item2 > 4_000_000)
+                ranges[index] = (0,0);
+
+            if (ranges[index].Item1 < 0 && ranges[index].Item2 > 4_000_000)
+                ranges[index] = (0, 4_000_000);
+
+            if (ranges[index].Item1 < 0)
+                ranges[index] = (0, ranges[index].Item2);
+
+            if (ranges[index].Item2 > 4_000_000)
+                ranges[index] = (ranges[index].Item1, 4_000_000);
+            
+            index++;
+        }
+        var x = ranges.OrderBy(r => r.Item1).ToList();
+
+        for (int i = 1; i < x.Count; i++)
+        {
+            var previous = x[i - 1];
+            var current = x[i];
+
+            if (previous.Item2 >= current.Item1)
+            {
+                x.Remove(previous);
+                x[x.FindIndex(v => v == current)] = (previous.Item1, Math.Max(previous.Item2, current.Item2));
+                i--;
+            }
+        }
+        if (x.Count != 1) {
+            Console.WriteLine(targetLine);
+        }
+        var result = 1;
+        foreach ((var start, var end) in x)
+        {
+            result += end - start;
+        }
+
+        return result;
     }
 }
