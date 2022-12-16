@@ -49,13 +49,12 @@ public class Day15 : StringListDay
 
     protected override object SecondTask()
     {
-        for (int i = 0; i < 4_000_000; i++)
+        int min = 0, max = 4_000_000;
+        for (int i = 0; i < max; i++)
         {
-            if (i % 10_000 == 0) {
-                Console.WriteLine(i);
-            }
-            if (GetBusySquares(i) == 4_000_000) {
-                Console.WriteLine(i);
+            if (GetBusySquares(i, min, max) is int x)
+            {
+                return (long)x * max + i;
             }
         }
 
@@ -71,7 +70,7 @@ public class Day15 : StringListDay
         return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
     }
 
-    private int GetBusySquares(int targetLine)
+    private int? GetBusySquares(int targetLine, int mapMin, int mapMax)
     {
         var ranges = new List<(int, int)>();
         foreach (var line in this.Input)
@@ -88,22 +87,23 @@ public class Day15 : StringListDay
             ranges.Add((station.X - sideLength, station.X + sideLength));
         }
         var index = 0;
-        while (index < ranges.Count) {
+        while (index < ranges.Count)
+        {
             if (ranges[index].Item1 < 0 && ranges[index].Item2 < 0)
-                ranges[index] = (0,0);
+                ranges[index] = (0, 0);
 
-            if (ranges[index].Item1 > 4_000_000 && ranges[index].Item2 > 4_000_000)
-                ranges[index] = (0,0);
+            if (ranges[index].Item1 > mapMax && ranges[index].Item2 > mapMax)
+                ranges[index] = (0, 0);
 
-            if (ranges[index].Item1 < 0 && ranges[index].Item2 > 4_000_000)
-                ranges[index] = (0, 4_000_000);
+            if (ranges[index].Item1 < 0 && ranges[index].Item2 > mapMax)
+                ranges[index] = (0, mapMax);
 
             if (ranges[index].Item1 < 0)
                 ranges[index] = (0, ranges[index].Item2);
 
-            if (ranges[index].Item2 > 4_000_000)
-                ranges[index] = (ranges[index].Item1, 4_000_000);
-            
+            if (ranges[index].Item2 > mapMax)
+                ranges[index] = (ranges[index].Item1, mapMax);
+
             index++;
         }
         var x = ranges.OrderBy(r => r.Item1).ToList();
@@ -120,15 +120,11 @@ public class Day15 : StringListDay
                 i--;
             }
         }
-        if (x.Count != 1) {
-            Console.WriteLine(targetLine);
-        }
-        var result = 1;
-        foreach ((var start, var end) in x)
+        if (x.Count != 1)
         {
-            result += end - start;
+            return x[0].Item2 + 1;
         }
 
-        return result;
+        return null;
     }
 }
