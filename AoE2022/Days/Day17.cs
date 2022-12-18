@@ -1,4 +1,5 @@
 using AoE2022.Utils;
+
 public class Day17 : EntireStringDay
 {
     protected override object FirstTask()
