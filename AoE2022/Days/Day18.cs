@@ -4,14 +4,21 @@ using AoE2022.Utils;
 public class Day18 : StringListDay
 {
     private static Regex NumberPattern = new Regex(@"\d+");
-    private static List<(int, int, int)> Dirs = new() {
-            (-1, 0, 0),
-            (1, 0, 0),
-            (0, -1, 0),
-            (0, 1, 0),
-            (0, 0, -1),
-            (0, 0, 1),
-        };
+    private static List<(int, int, int)> Dirs = new()
+    {
+        (-1, 0, 0),
+        (1, 0, 0),
+        (0, -1, 0),
+        (0, 1, 0),
+        (0, 0, -1),
+        (0, 0, 1),
+    };
+
+    private static List<(Func<Cube, int>, Func<Cube, int>, Func<Cube, int>)> d = new() {
+        (new(c => c.X), new(c => c.Y), new(c => c.Z)),
+        (new(c => c.Y), new(c => c.Z), new(c => c.X)),
+        (new(c => c.Z), new(c => c.X), new(c => c.Y)),
+    };
 
     protected override object FirstTask()
     {
@@ -27,7 +34,7 @@ public class Day18 : StringListDay
         var maxZ = cubes.MaxBy(c => c.Z).Z + 1;
 
         var adjacentCubes = new List<Cube>() {
-            new(new List<int> { 0, 0, 0 })
+            new(0, 0, 0 )
         };
         var markedCubesMap = new HashSet<Cube>(cubes);
         while (adjacentCubes.Count > 0)
@@ -46,7 +53,7 @@ public class Day18 : StringListDay
             {
                 foreach (var z in Enumerable.Range(0, maxZ))
                 {
-                    var cube = new Cube(new List<int> { x, y, z });
+                    var cube = new Cube(x, y, z);
                     if (!markedCubesMap.Contains(cube))
                     {
                         cubes.Add(cube);
@@ -58,7 +65,7 @@ public class Day18 : StringListDay
         return GetVisibleSides(cubes);
     }
 
-    private record Cube
+    private record struct Cube
     {
         public Cube(List<int> vals)
         {
@@ -67,7 +74,8 @@ public class Day18 : StringListDay
             this.Z = vals[2];
         }
 
-        public Cube(int x, int y, int z) {
+        public Cube(int x, int y, int z)
+        {
             this.X = x;
             this.Y = y;
             this.Z = z;
@@ -78,7 +86,7 @@ public class Day18 : StringListDay
         public int Z { get; init; }
     }
 
-    private record Side(int Dim1, int Dim2);
+    private record struct Side(int Dim1, int Dim2);
 
     private IEnumerable<Cube> GetAdjacentCubes(HashSet<Cube> map, Cube cube, int maxX, int maxY, int maxZ)
         => Dirs.Select(dir => cube with { X = cube.X + dir.Item1, Y = cube.Y + dir.Item2, Z = cube.Z + dir.Item3 })
@@ -87,16 +95,10 @@ public class Day18 : StringListDay
 
     private int GetVisibleSides(List<Cube> cubes)
     {
-        var d = new List<(Func<Cube, int>, Func<Cube, int>, Func<Cube, int>)>() {
-            (new(c => c.X), new(c => c.Y), new(c => c.Z)),
-            (new(c => c.Y), new(c => c.Z), new(c => c.X)),
-            (new(c => c.Z), new(c => c.X), new(c => c.Y)),
-        };
-
         var score = 0;
         foreach (var act in d)
         {
-            var perspective = cubes.OrderBy(act.Item3).GroupBy(v => new Side(act.Item1(v), act.Item2(v)), act.Item3).ToList();
+            var perspective = cubes.OrderBy(act.Item3).GroupBy(v => new Side(act.Item1(v), act.Item2(v)), act.Item3);
             foreach (var side in perspective)
             {
                 var items = side.ToList();
