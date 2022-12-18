@@ -1,4 +1,6 @@
-﻿namespace AoE2022;
+﻿using BenchmarkDotNet.Running;
+
+namespace AoE2022;
 
 internal class Program
 {
@@ -10,5 +12,7 @@ internal class Program
         day.RunFirstTask();
 
         day.RunSecondTask();
+
+        var summary = BenchmarkRunner.Run<DayBenchmarks>();
     }
 }

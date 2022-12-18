@@ -8,7 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
     <PackageReference Include="MoreLinq" Version="3.3.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="/Inputs/*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   
 </Project>
