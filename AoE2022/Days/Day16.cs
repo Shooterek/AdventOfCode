@@ -5,6 +5,7 @@ public class Day16 : StringListDay
 {
     private static Regex NumberPattern = new Regex(@"\d+");
     private static Regex ValvePattern = new Regex(@"[A-Z]{2}");
+
     protected override object FirstTask()
     {
         var map = new Dictionary<string, Node>();
@@ -30,10 +31,14 @@ public class Day16 : StringListDay
             }
         }
 
+        return FindBestScore(30, nodesWithFlowRate.Count - 1, map, map2, new()).MaxBy(s => s.Item1).Item1;
+    }
+
+    private List<(int, List<NodePath>)> FindBestScore(int time, int maxCount, Dictionary<string, Node> map, Dictionary<string, List<(int, string)>> map2, List<string> except)
+    {
         var scores = new List<(int, List<NodePath>)>();
-        FindAllPaths("AA", 30, new(), false);
-        var x = scores.OrderByDescending(s => s.Item1).ToList();
-        return x.First().Item1;
+        FindAllPaths("AA", time, new(), false);
+        return scores;
 
         void FindAllPaths(string node, int remainingSeconds, List<NodePath> path, bool open)
         {
@@ -41,7 +46,7 @@ public class Day16 : StringListDay
             {
                 path.Add(new(remainingSeconds, node));
             }
-            if (remainingSeconds < 1 || path.Count == nodesWithFlowRate.Count - 1)
+            if (remainingSeconds < 1 || path.Count == maxCount)
             {
                 var val = path.Where(s => s.Seconds > 0).Aggregate(0, (score, node) =>
                 {
@@ -54,7 +59,7 @@ public class Day16 : StringListDay
 
             foreach (var n in map2[node])
             {
-                if (!path.Any(p => p.Node == n.Item2))
+                if (!except.Any(p => p == n.Item2) && !path.Any(p => p.Node == n.Item2))
                 {
                     FindAllPaths(n.Item2, remainingSeconds - n.Item1, new(path), true);
                 }
