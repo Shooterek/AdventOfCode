@@ -31,14 +31,19 @@ public class Day16 : StringListDay
             }
         }
 
-        return FindBestScore(30, nodesWithFlowRate.Count - 1, map, map2, new()).MaxBy(s => s.Item1).Item1;
+        return FindBestScore(30, nodesWithFlowRate.Count - 1, map, map2);
     }
 
-    private List<(int, List<NodePath>)> FindBestScore(int time, int maxCount, Dictionary<string, Node> map, Dictionary<string, List<(int, string)>> map2, List<string> except)
+    protected override object SecondTask()
+    {
+        throw new NotImplementedException();
+    }
+
+    private int FindBestScore(int time, int maxCount, Dictionary<string, Node> map, Dictionary<string, List<(int, string)>> map2)
     {
         var scores = new List<(int, List<NodePath>)>();
         FindAllPaths("AA", time, new(), false);
-        return scores;
+        return scores.MaxBy(s => s.Item1).Item1;
 
         void FindAllPaths(string node, int remainingSeconds, List<NodePath> path, bool open)
         {
@@ -59,7 +64,7 @@ public class Day16 : StringListDay
 
             foreach (var n in map2[node])
             {
-                if (!except.Any(p => p == n.Item2) && !path.Any(p => p.Node == n.Item2))
+                if (!path.Any(p => p.Node == n.Item2))
                 {
                     FindAllPaths(n.Item2, remainingSeconds - n.Item1, new(path), true);
                 }
@@ -85,11 +90,6 @@ public class Day16 : StringListDay
         }
 
         return null;
-    }
-
-    protected override object SecondTask()
-    {
-        throw new NotImplementedException();
     }
 
     private record Node(int Flow, List<string> Tunnels);
