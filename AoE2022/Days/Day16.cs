@@ -31,19 +31,14 @@ public class Day16 : StringListDay
             }
         }
 
-        return FindBestScore(30, nodesWithFlowRate.Count - 1, map, map2);
+        return FindScores(30, nodesWithFlowRate.Count - 1, map, map2).MaxBy(s => s.Item1).Item1;
     }
 
-    protected override object SecondTask()
-    {
-        throw new NotImplementedException();
-    }
-
-    private int FindBestScore(int time, int maxCount, Dictionary<string, Node> map, Dictionary<string, List<(int, string)>> map2)
+    private List<(int, List<NodePath>)> FindScores(int time, int maxCount, Dictionary<string, Node> map, Dictionary<string, List<(int, string)>> map2)
     {
         var scores = new List<(int, List<NodePath>)>();
         FindAllPaths("AA", time, new(), false);
-        return scores.MaxBy(s => s.Item1).Item1;
+        return scores;
 
         void FindAllPaths(string node, int remainingSeconds, List<NodePath> path, bool open)
         {
@@ -70,6 +65,59 @@ public class Day16 : StringListDay
                 }
             }
         }
+    }
+
+    protected override object SecondTask()
+    {
+        var map = new Dictionary<string, Node>();
+        foreach (var line in this.Input)
+        {
+            var rate = int.Parse(NumberPattern.Match(line).Captures.First().Value);
+            var valves = ValvePattern.Matches(line).Select(m => m.Captures.First().Value).ToArray();
+            map.Add(valves[0], new(rate, valves[1..].ToList()));
+        }
+        var nodesWithFlowRate = map.Where(kv => kv.Value.Flow > 0 || kv.Key == "AA").ToList();
+        var map2 = new Dictionary<string, List<(int, string)>>();
+
+        foreach (var flowNode in nodesWithFlowRate)
+        {
+            map2[flowNode.Key] = new();
+            var otherNodes = nodesWithFlowRate.Where(n => n.Key != flowNode.Key && n.Key != "AA").Select(n => n.Key).ToList();
+            foreach (var other in otherNodes)
+            {
+                var pathLength = FindPaths(flowNode, map, otherNodes, other);
+                if (pathLength is int path)
+                    map2[flowNode.Key].Add((path, other));
+            }
+        }
+
+        var maxPathLength = nodesWithFlowRate.Count - 1;
+        var scores = Enumerable.Range(1, maxPathLength - 1)
+            .SelectMany(max => FindScores(26, max, map, map2))
+            .DistinctBy(c => string.Join("", c.Item2.Select(n => n.Node)))
+            .OrderBy(c => string.Join("", c.Item2.Select(n => n.Node)))
+            .ToList();
+
+        var result = 0;
+        for (int i = 0; i < scores.Count; i++)
+        {
+            if (i % 10 == 0) {
+                Console.WriteLine(result);
+            }
+            for (int j = scores.Count - 1; j >= 0; j--)
+            {
+                var one = scores[i];
+                var two = scores[j];
+                var h1 = new HashSet<string>(one.Item2.Select(c => c.Node));
+                if (two.Item2.All(i => h1.Add(i.Node))) {
+                    var sum = one.Item1 + two.Item1;
+                    if (sum > result)
+                        result = sum;
+                }
+            }
+        }
+
+        return result;
     }
 
     private int? FindPaths(KeyValuePair<string, Node> flowNode, Dictionary<string, Node> allNodes, List<string> flowNodes, string nodeToFind)
