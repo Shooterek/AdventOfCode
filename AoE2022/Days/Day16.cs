@@ -34,10 +34,11 @@ public class Day16 : StringListDay
         return FindScores(30, nodesWithFlowRate.Count - 1, map, map2).MaxBy(s => s.Item1).Item1;
     }
 
-    private List<(int, List<NodePath>)> FindScores(int time, int maxCount, Dictionary<string, Node> map, Dictionary<string, List<(int, string)>> map2)
+    private List<(int, List<string>)> FindScores(int time, int maxCount, Dictionary<string, Node> map, Dictionary<string, List<(int, string)>> map2)
     {
-        var scores = new List<(int, List<NodePath>)>();
+        var scores = new List<(int, List<string>)>();
         FindAllPaths("AA", time, new(), false);
+
         return scores;
 
         void FindAllPaths(string node, int remainingSeconds, List<NodePath> path, bool open)
@@ -53,7 +54,7 @@ public class Day16 : StringListDay
                     var n = map[node.Node];
                     return score + node.Seconds * n.Flow;
                 });
-                scores.Add((val, path));
+                scores.Add((val, path.Select(o => o.Node).ToList()));
                 return;
             }
 
@@ -94,25 +95,34 @@ public class Day16 : StringListDay
         var maxPathLength = nodesWithFlowRate.Count - 1;
         var scores = Enumerable.Range(1, maxPathLength - 1)
             .SelectMany(max => FindScores(26, max, map, map2))
-            .DistinctBy(c => string.Join("", c.Item2.Select(n => n.Node)))
-            .OrderBy(c => string.Join("", c.Item2.Select(n => n.Node)))
+            .DistinctBy(c => string.Join("", c.Item2))
+            .OrderByDescending(c => c.Item2.Count)
             .ToList();
 
+            var x = scores.Count(s => s.Item2.Count >= 7);
+
         var result = 0;
-        for (int i = 0; i < scores.Count; i++)
+        var lastScore = 0;
+        for (int i = 0; i < scores.Count / 2 + 1 ; i++)
         {
-            if (i % 10 == 0) {
-                Console.WriteLine(result);
+            if (i % 10 == 0)
+            {
+                Console.WriteLine($"{result} | {i}/{scores.Count / 2} ||| Last score: {lastScore}");
             }
-            for (int j = scores.Count - 1; j >= 0; j--)
+            for (int j = scores.Count - 1; j >= scores.Count / 2 - 1; j--)
             {
                 var one = scores[i];
                 var two = scores[j];
-                var h1 = new HashSet<string>(one.Item2.Select(c => c.Node));
-                if (two.Item2.All(i => h1.Add(i.Node))) {
+                if (two.Item2.Count + one.Item2.Count > maxPathLength)
+                    continue;
+                var hs = new HashSet<string>();
+                if (two.Item2.All(i => hs.Add(i)) && one.Item2.All(i => hs.Add(i)))
+                {
                     var sum = one.Item1 + two.Item1;
-                    if (sum > result)
+                    lastScore = sum;
+                    if (sum > result){
                         result = sum;
+                    }
                 }
             }
         }
@@ -140,7 +150,7 @@ public class Day16 : StringListDay
         return null;
     }
 
-    private record Node(int Flow, List<string> Tunnels);
+    private record struct Node(int Flow, List<string> Tunnels);
 
     private class NodePath
     {
