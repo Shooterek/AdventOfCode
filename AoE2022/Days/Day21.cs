@@ -2,16 +2,27 @@ using AoE2022.Utils;
 
 public class Day21 : StringListDay
 {
+    private const string RootInstruction = "root";
+    private const string HumanInstruction = "humn";
+    private const string P2ValueToFind = "x";
+
     protected override object FirstTask()
     {
         var instructions = GetInstructions();
 
-        return instructions["root"].GetValue(instructions);
+        return instructions[RootInstruction].GetValue(instructions);
     }
 
     protected override object SecondTask()
     {
         var instructions = GetInstructions();
+        var root = (OperationAction)instructions[RootInstruction];
+        instructions[RootInstruction] = new OperationAction(root.Left, root.Right, '=');
+        instructions[HumanInstruction] = new YellNumber(P2ValueToFind);
+
+        var val = instructions[RootInstruction].GetStringValue(instructions);
+        Console.WriteLine(val);
+        return 0;
     }
 
     private Dictionary<string, Action> GetInstructions()
@@ -23,7 +34,7 @@ public class Day21 : StringListDay
             Action act;
             if (char.IsDigit(split[1][0]))
             {
-                act = new YellNumber(long.Parse(split[1]));
+                act = new YellNumber(split[1]);
             }
             else
             {
@@ -40,11 +51,15 @@ public class Day21 : StringListDay
     private abstract record Action()
     {
         public abstract long GetValue(Dictionary<string, Action> instructions);
+
+        public abstract string GetStringValue(Dictionary<string, Action> instructions);
     }
 
-    private record YellNumber(long Number) : Action
+    private record YellNumber(string Number) : Action
     {
-        public override long GetValue(Dictionary<string, Action> instructions) => this.Number;
+        public override long GetValue(Dictionary<string, Action> instructions) => long.Parse(this.Number);
+
+        public override string GetStringValue(Dictionary<string, Action> instructions) => this.Number.ToString();
     }
 
     private record OperationAction(string Left, string Right, char Operation) : Action
@@ -53,10 +68,10 @@ public class Day21 : StringListDay
         {
             var leftValue = instructions[this.Left].GetValue(instructions);
             if (instructions[this.Left] is OperationAction)
-                instructions[this.Left] = new YellNumber(leftValue);
+                instructions[this.Left] = new YellNumber(leftValue.ToString());
             var rightValue = instructions[this.Right].GetValue(instructions);
             if (instructions[this.Right] is OperationAction)
-                instructions[this.Right] = new YellNumber(rightValue);
+                instructions[this.Right] = new YellNumber(rightValue.ToString());
 
             return this.Operation switch
             {
@@ -66,6 +81,19 @@ public class Day21 : StringListDay
                 '*' => leftValue * rightValue,
                 '=' => leftValue == rightValue ? 1 : 0,
             };
+        }
+
+        public override string GetStringValue(Dictionary<string, Action> instructions)
+        {
+            var left = instructions[this.Left].GetStringValue(instructions);
+            var right = instructions[this.Right].GetStringValue(instructions);
+
+            if (!left.Contains(P2ValueToFind))
+                left = instructions[this.Left].GetValue(instructions).ToString();
+
+            if (!right.Contains(P2ValueToFind))
+                right = instructions[this.Right].GetValue(instructions).ToString();
+            return '(' + left + this.Operation + right + ')';
         }
     }
 }
