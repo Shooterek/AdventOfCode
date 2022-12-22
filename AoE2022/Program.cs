@@ -14,7 +14,7 @@ internal class Program
         var currentDay = DateTime.Now.Day;
         var day = (Day)Activator.CreateInstance(null, $"Day{19}").Unwrap();
 
-        //day.RunFirstTask();
+        day.RunFirstTask();
 
         day.RunSecondTask();
     }
