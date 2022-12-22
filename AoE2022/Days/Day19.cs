@@ -7,14 +7,19 @@ public class Day19 : StringListDay
     protected override object FirstTask()
     {
         var blueprints = this.Input.Select(line => new Blueprint(NumberPattern.Matches(line).Select(m => int.Parse(m.Captures.First().Value)).ToList())).ToList();
-        return blueprints.Select((b, index) => MaxGeodes(b) * (index + 1)).Sum();
+        return blueprints.Select((b, index) => MaxGeodes(b, 24) * (index + 1)).Sum();
     }
 
-    private int MaxGeodes(Blueprint bp)
+    protected override object SecondTask()
+    {
+        var blueprints = this.Input.Select(line => new Blueprint(NumberPattern.Matches(line).Select(m => int.Parse(m.Captures.First().Value)).ToList())).ToList();
+        return blueprints.Take(3).Select((b, index) => MaxGeodes(b, 32)).Aggregate((curr, next) => curr * next);
+    }
+
+    private int MaxGeodes(Blueprint bp, int iterations)
     {
         var max = 0;
-        BruteForce(1, 0, 0, 0, 0, 0, 0, 0, 24);
-        Console.WriteLine(max);
+        BruteForce(1, 0, 0, 0, 0, 0, 0, 0, iterations);
         return max;
 
         void BruteForce(int oreRobots, int clayRobots, int obsidianRobots, int geodeRobots, int ore, int clay, int obsidian, int geo, int timeLeft)
@@ -52,46 +57,45 @@ public class Day19 : StringListDay
                                geo + geodeRobots,
                                timeLeft - 1);
                 }
-                if (ore >= bp.OreRobotCost && ore < 25)
+                else
                 {
-                    BruteForce(oreRobots + 1,
-                    clayRobots,
-                    obsidianRobots,
-                    geodeRobots,
-                    ore - bp.OreRobotCost + oreRobots,
-                    clay + clayRobots,
-                    obsidian + obsidianRobots,
-                    geo + geodeRobots,
-                    timeLeft - 1);
-                }
-                if (ore >= bp.ClayRobotCost && clay < 25)
-                {
+
+                    if (ore >= bp.OreRobotCost && oreRobots < bp.MaxOreCost && timeLeft > 7)
+                    {
+                        BruteForce(oreRobots + 1,
+                        clayRobots,
+                        obsidianRobots,
+                        geodeRobots,
+                        ore - bp.OreRobotCost + oreRobots,
+                        clay + clayRobots,
+                        obsidian + obsidianRobots,
+                        geo + geodeRobots,
+                        timeLeft - 1);
+                    }
+                    if (ore >= bp.ClayRobotCost && timeLeft > 7)
+                    {
+                        BruteForce(oreRobots,
+                                   clayRobots + 1,
+                                   obsidianRobots,
+                                   geodeRobots,
+                                   ore - bp.ClayRobotCost + oreRobots,
+                                   clay + clayRobots,
+                                   obsidian + obsidianRobots,
+                                   geo + geodeRobots,
+                                   timeLeft - 1);
+                    }
                     BruteForce(oreRobots,
-                               clayRobots + 1,
+                               clayRobots,
                                obsidianRobots,
                                geodeRobots,
-                               ore - bp.ClayRobotCost + oreRobots,
+                               ore + oreRobots,
                                clay + clayRobots,
                                obsidian + obsidianRobots,
                                geo + geodeRobots,
                                timeLeft - 1);
                 }
-                BruteForce(oreRobots,
-                           clayRobots,
-                           obsidianRobots,
-                           geodeRobots,
-                           ore + oreRobots,
-                           clay + clayRobots,
-                           obsidian + obsidianRobots,
-                           geo + geodeRobots,
-                           timeLeft - 1);
             }
         }
-    }
-
-    protected override object SecondTask()
-    {
-        throw new NotImplementedException();
     }
 
     private class Blueprint
@@ -104,6 +108,8 @@ public class Day19 : StringListDay
             this.ObsidianRobotClayCost = costs[4];
             this.GeodeRobotOreCost = costs[5];
             this.GeodeRobotObsidianCost = costs[6];
+
+            this.MaxOreCost = new List<int> { this.ClayRobotCost, this.ObsidianRobotOreCost, this.GeodeRobotOreCost }.Max();
         }
 
         public int OreRobotCost { get; set; }
@@ -117,5 +123,7 @@ public class Day19 : StringListDay
         public int GeodeRobotOreCost { get; set; }
 
         public int GeodeRobotObsidianCost { get; set; }
+
+        public int MaxOreCost { get; set; }
     }
 }
