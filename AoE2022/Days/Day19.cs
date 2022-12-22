@@ -20,7 +20,6 @@ public class Day19 : StringListDay
     {
         var max = 0;
         BruteForce(1, 0, 0, 0, 0, 0, 0, 0, iterations);
-        Console.WriteLine(max);
         return max;
 
         void BruteForce(int oreRobots, int clayRobots, int obsidianRobots, int geodeRobots, int ore, int clay, int obsidian, int geo, int timeLeft)
