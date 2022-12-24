@@ -46,7 +46,7 @@ public class Day24 : StringListDay
         return bestPath;
     }
 
-    private int FindBestPath(Dictionary<Point, List<int>> map, Point start, Point end)
+    private int FindBestPath(Dictionary<Point, List<int>> map, Point start, Point end, int iteration)
     {
         var shortestPath = int.MaxValue;
         var nextMoves = new List<Point>() {
@@ -59,30 +59,25 @@ public class Day24 : StringListDay
 
         var visited = new HashSet<(Point, int)>();
 
-        FindPath(end, 6);
+        while (!nextMoves.Select(m => start.Add(m)).Any(m => map.GetValueOrDefault(m)?.Contains(iteration) == true)) {
+            iteration++;
+        }
+        FindPath(start, iteration);
 
         void FindPath(Point current, int iteration)
         {
             if (!visited.Add((current, iteration)))
                 return;
-            
-            var lengthToStart = current.X + current.Y + 1;
-            if (iteration + lengthToStart >= shortestPath)
-            {
-                Console.WriteLine(current);
-                return;
-            }
 
-            if (current == start)
+            if (current == end)
             {
                 shortestPath = iteration;
-                Console.WriteLine(shortestPath);
                 return;
             }
 
             foreach (var nextPoint in nextMoves.Select(m => current.Add(m)))
             {
-                if (nextPoint == start)
+                if (nextPoint == end)
                 {
                     FindPath(nextPoint, iteration + 1);
                     return;
@@ -94,7 +89,7 @@ public class Day24 : StringListDay
             }
         }
 
-        return shortestPath;
+        return shortestPath - 1;
     }
 
     protected override object SecondTask()
