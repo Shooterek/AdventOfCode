@@ -90,7 +90,7 @@ public class Day24 : StringListDay
         return goal2;
     }
 
-    private int FindBestPath(Dictionary<Point, List<int>> map, Point start, Point end, int iteration)
+    private int FindBestPath(Dictionary<Point, List<int>> map, Point start, Point end, int startIteration)
     {
         var shortestPath = int.MaxValue;
         var nextMoves = new List<Point>() {
@@ -103,11 +103,11 @@ public class Day24 : StringListDay
 
         var visited = new HashSet<(Point, int)>();
 
-        while (!nextMoves.Select(m => start.Add(m)).Any(m => map.GetValueOrDefault(m)?.Contains(iteration) == true))
+        while (!nextMoves.Select(m => start.Add(m)).Any(m => map.GetValueOrDefault(m)?.Contains(startIteration) == true))
         {
-            iteration++;
+            startIteration++;
         }
-        FindPath(start, iteration);
+        FindPath(start, startIteration);
 
         void FindPath(Point current, int iteration)
         {
