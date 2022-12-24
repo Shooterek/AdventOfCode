@@ -41,9 +41,53 @@ public class Day24 : StringListDay
             }));
         }
 
-        var bestPath = FindBestPath(x, start, end);
+        var bestPath = FindBestPath(x, start, end, 0);
 
         return bestPath;
+    }
+
+    protected override object SecondTask()
+    {
+        var map = this.Input.Select(line => line.Select(c => c).ToArray()).ToArray();
+        var map2 = map[1..^1].Select(line => line[1..^1].ToArray()).ToArray();
+        var start = new Point(0, -1);
+        var end = new Point(map2[0].Length - 1, map2.Length);
+        var x = new Dictionary<Point, List<int>>();
+        var xLength = map2[0].Length;
+        var yLength = map2.Length;
+        var cycleLength = (xLength) * (yLength);
+
+        map2.ForEach((line, yIndex) => line.ForEach((c, xIndex) =>
+        {
+            x.Add(new(xIndex, yIndex), new List<int>());
+        }));
+
+        for (int i = 0; i < cycleLength; i++)
+        {
+            map2.ForEach((line, yIndex) => line.ForEach((c, xIndex) =>
+            {
+                var leftIndex = (xIndex + i) % xLength;
+                var rightIndex = Mod(xIndex - (i % xLength), xLength);
+                var xAvailable = line[leftIndex] != '<' && line[rightIndex] != '>';
+
+                if (!xAvailable)
+                    return;
+
+                var col = map2.Select(line => line.ElementAt(xIndex)).ToArray();
+                var botIndex = (yIndex + i) % yLength;
+                var topIndex = Mod(yIndex - (i % yLength), yLength);
+                var yAvailable = col[topIndex] != 'v' && col[botIndex] != '^';
+
+                if (yAvailable)
+                    x[new(xIndex, yIndex)].Add(i);
+            }));
+        }
+
+        var goal = FindBestPath(x, start, end, 0);
+        var back = FindBestPath(x, end, start, goal + 1);
+        var goal2 = FindBestPath(x, start, end, back + 1);
+
+        return goal2;
     }
 
     private int FindBestPath(Dictionary<Point, List<int>> map, Point start, Point end, int iteration)
@@ -59,7 +103,8 @@ public class Day24 : StringListDay
 
         var visited = new HashSet<(Point, int)>();
 
-        while (!nextMoves.Select(m => start.Add(m)).Any(m => map.GetValueOrDefault(m)?.Contains(iteration) == true)) {
+        while (!nextMoves.Select(m => start.Add(m)).Any(m => map.GetValueOrDefault(m)?.Contains(iteration) == true))
+        {
             iteration++;
         }
         FindPath(start, iteration);
@@ -90,11 +135,6 @@ public class Day24 : StringListDay
         }
 
         return shortestPath - 1;
-    }
-
-    protected override object SecondTask()
-    {
-        throw new NotImplementedException();
     }
 
     private record Point(int X, int Y)
