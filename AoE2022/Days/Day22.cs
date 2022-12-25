@@ -10,9 +10,6 @@ public class Day22 : StringBatchesDay
 
     private static Regex NumberPattern = new Regex(@"\d+");
 
-    public List<List<char>> map;
-    public List<Point> points = new();
-
 	protected override object FirstTask()
     {
         var map = this.Input[0]
@@ -69,7 +66,7 @@ public class Day22 : StringBatchesDay
 
     protected override object SecondTask()
     {
-        this.map = this.Input[0]
+        var map = this.Input[0]
             .Split("\r ")
             .Select(l => l.Select(c => c).ToList()).ToList();
 
@@ -195,7 +192,6 @@ public class Day22 : StringBatchesDay
                     break;
                 }
                 pos = (newX, newY);
-                this.points.Add(new(newX, newY));
                 Console.WriteLine($"{pos}: {direction} | {instruction}");
 
                 if (map[newY][newX] == None)
