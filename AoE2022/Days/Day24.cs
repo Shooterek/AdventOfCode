@@ -1,6 +1,4 @@
-using System.Collections.Concurrent;
 using AoE2022.Utils;
-using MoreLinq;
 
 public class Day24 : StringListDay
 {
@@ -15,33 +13,7 @@ public class Day24 : StringListDay
         var yLength = map2.Length;
         var cycleLength = (xLength) * (yLength);
 
-        map2.ForEach((line, yIndex) => line.ForEach((c, xIndex) =>
-        {
-            x.Add(new(xIndex, yIndex), new List<int>());
-        }));
-
-        for (int i = 0; i < cycleLength; i++)
-        {
-            map2.ForEach((line, yIndex) => line.ForEach((c, xIndex) =>
-            {
-                var leftIndex = (xIndex + i) % xLength;
-                var rightIndex = Mod(xIndex - (i % xLength), xLength);
-                var xAvailable = line[leftIndex] != '<' && line[rightIndex] != '>';
-
-                if (!xAvailable)
-                    return;
-
-                var col = map2.Select(line => line.ElementAt(xIndex)).ToArray();
-                var botIndex = (yIndex + i) % yLength;
-                var topIndex = Mod(yIndex - (i % yLength), yLength);
-                var yAvailable = col[topIndex] != 'v' && col[botIndex] != '^';
-
-                if (yAvailable)
-                    x[new(xIndex, yIndex)].Add(i);
-            }));
-        }
-
-        var bestPath = FindBestPath(x, start, end, 0);
+        var bestPath = FindBestPath(map2, xLength, yLength, start, end, 0);
 
         return bestPath;
     }
@@ -57,40 +29,14 @@ public class Day24 : StringListDay
         var yLength = map2.Length;
         var cycleLength = (xLength) * (yLength);
 
-        map2.ForEach((line, yIndex) => line.ForEach((c, xIndex) =>
-        {
-            x.Add(new(xIndex, yIndex), new List<int>());
-        }));
-
-        for (int i = 0; i < cycleLength; i++)
-        {
-            map2.ForEach((line, yIndex) => line.ForEach((c, xIndex) =>
-            {
-                var leftIndex = (xIndex + i) % xLength;
-                var rightIndex = Mod(xIndex - (i % xLength), xLength);
-                var xAvailable = line[leftIndex] != '<' && line[rightIndex] != '>';
-
-                if (!xAvailable)
-                    return;
-
-                var col = map2.Select(line => line.ElementAt(xIndex)).ToArray();
-                var botIndex = (yIndex + i) % yLength;
-                var topIndex = Mod(yIndex - (i % yLength), yLength);
-                var yAvailable = col[topIndex] != 'v' && col[botIndex] != '^';
-
-                if (yAvailable)
-                    x[new(xIndex, yIndex)].Add(i);
-            }));
-        }
-
-        var goal = FindBestPath(x, start, end, 0);
-        var back = FindBestPath(x, end, start, goal + 1);
-        var goal2 = FindBestPath(x, start, end, back + 1);
+        var goal = FindBestPath(map2, xLength, yLength, start, end, 0);
+        var back = FindBestPath(map2, xLength, yLength, end, start, goal);
+        var goal2 = FindBestPath(map2, xLength, yLength, start, end, back);
 
         return goal2;
     }
 
-    private int FindBestPath(Dictionary<Point, List<int>> map, Point start, Point end, int startIteration)
+    private int FindBestPath(char[][] map, int xLength, int yLength, Point start, Point end, int startIteration)
     {
         var shortestPath = int.MaxValue;
         var nextMoves = new List<Point>() {
@@ -102,15 +48,17 @@ public class Day24 : StringListDay
         };
 
         var visited = new HashSet<(Point, int)>();
-
-        while (!nextMoves.Select(m => start.Add(m)).Any(m => map.GetValueOrDefault(m)?.Contains(startIteration) == true))
+        for (int i = 0; i < 24; i++)
         {
-            startIteration++;
+            FindPath(start, startIteration + i);
+            visited.Clear();
         }
-        FindPath(start, startIteration);
+        return shortestPath;
 
         void FindPath(Point current, int iteration)
         {
+            if (iteration >= 3500 || iteration > shortestPath)
+                return;
             if (!visited.Add((current, iteration)))
                 return;
 
@@ -127,14 +75,33 @@ public class Day24 : StringListDay
                     FindPath(nextPoint, iteration + 1);
                     return;
                 }
-                if (map.GetValueOrDefault(nextPoint)?.Contains(iteration) == true)
+                if (MoveAvailable(nextPoint, iteration + 1))
                 {
                     FindPath(nextPoint, iteration + 1);
                 }
             }
         }
 
-        return shortestPath - 1;
+        bool MoveAvailable(Point m, int i)
+        {
+            if (m.X < 0 || m.Y < 0 || m.X >= xLength || m.Y >= yLength)
+                return false;
+
+            var line = map[m.Y];
+            var leftIndex = (m.X + i) % xLength;
+            var rightIndex = Mod(m.X - (i % xLength), xLength);
+            var xAvailable = line[leftIndex] != '<' && line[rightIndex] != '>';
+
+            if (!xAvailable)
+                return false;
+
+            var col = map.Select(line => line.ElementAt(m.X)).ToArray();
+            var botIndex = (m.Y + i) % yLength;
+            var topIndex = Mod(m.Y - (i % yLength), yLength);
+            var yAvailable = col[topIndex] != 'v' && col[botIndex] != '^';
+
+            return yAvailable;
+        }
     }
 
     private record Point(int X, int Y)
