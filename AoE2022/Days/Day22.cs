@@ -73,10 +73,6 @@ public class Day22 : StringBatchesDay
             .Split("\r ")
             .Select(l => l.Select(c => c).ToList()).ToList();
 
-        var moves = new List<Point>();
-
-        var maxWidth = map[0].Count - 1;
-        var maxHeight = map.Count - 1;
         int direction = 0;
         var pos = (x: map[0].IndexOf(Empty), y: 0);
 
@@ -112,7 +108,7 @@ public class Day22 : StringBatchesDay
                 }
                 else if (newY >= 0 && newY < 50)
                 {
-                    if (newX > maxWidth)
+                    if (newX >= 150)
                     {
                         newY = 149 - newY;
                         newX = 99;
@@ -163,7 +159,7 @@ public class Day22 : StringBatchesDay
                     else if (newX >= 100)
                     {
                         newY = 149 - newY;
-                        newX = maxWidth;
+                        newX = 149;
                         direction = 0;
                     }
                 }
