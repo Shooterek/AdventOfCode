@@ -1,3 +1,4 @@
+using System.Drawing;
 using System.Text.RegularExpressions;
 using AoE2022.Utils;
 
@@ -8,7 +9,11 @@ public class Day22 : StringBatchesDay
     private const char None = ' ';
 
     private static Regex NumberPattern = new Regex(@"\d+");
-    protected override object FirstTask()
+
+    public List<List<char>> map;
+    public List<Point> points = new();
+
+	protected override object FirstTask()
     {
         var map = this.Input[0]
             .Split("\r ")
@@ -64,9 +69,11 @@ public class Day22 : StringBatchesDay
 
     protected override object SecondTask()
     {
-        var map = this.Input[0]
+        this.map = this.Input[0]
             .Split("\r ")
             .Select(l => l.Select(c => c).ToList()).ToList();
+
+        var moves = new List<Point>();
 
         var maxWidth = map[0].Count - 1;
         var maxHeight = map.Count - 1;
@@ -97,7 +104,7 @@ public class Day22 : StringBatchesDay
                         newX = 0;
                         direction = 0;
                     }
-                    if (newX >= 100 && newX < 150)
+                    else if (newX >= 100 && newX < 150)
                     {
                         newY = 199;
                         newX = newX - 100;
@@ -107,20 +114,20 @@ public class Day22 : StringBatchesDay
                 {
                     if (newX > maxWidth)
                     {
-                        newY = maxHeight - 50 - newY;
+                        newY = 149 - newY;
                         newX = 99;
                         direction = 2;
                     }
                     else if (newX < 50)
                     {
-                        newY = maxHeight - 50 - newY;
+                        newY = 149 - newY;
                         newX = 0;
                         direction = 0;
                     }
                 }
                 else if (newY >= 50 && newY < 100)
                 {
-                    if (newX > 99 && direction == 0)
+                    if (newX >= 100 && direction == 0)
                     {
                         newX = 50 + newY;
                         newY = 49;
@@ -147,17 +154,17 @@ public class Day22 : StringBatchesDay
                 }
                 else if (newY >= 100 && newY < 150)
                 {
-                    if (newX >= 100)
+                    if (newX < 0)
                     {
-                        newY = 0 + 149 - newY;
-                        newX = maxWidth;
-                        direction = 0;
-                    }
-                    else if (newX < 0)
-                    {
-                        newY = 0 + 149 - newY;
+                        newY = 149 - newY;
                         newX = 50;
                         direction = 2;
+                    }
+                    else if (newX >= 100)
+                    {
+                        newY = 149 - newY;
+                        newX = maxWidth;
+                        direction = 0;
                     }
                 }
                 else if (newY >= 150 && newY < 200)
@@ -188,10 +195,11 @@ public class Day22 : StringBatchesDay
                 }
 
                 if (map[newY][newX] == Wall) {
-                    Console.WriteLine($"Wall at X:{newX}, Y: {newY}");
+                    //Console.WriteLine($"Wall at X:{newX}, Y: {newY}");
                     break;
                 }
                 pos = (newX, newY);
+                this.points.Add(new(newX, newY));
                 Console.WriteLine($"{pos}: {direction} | {instruction}");
 
                 if (map[newY][newX] == None)
