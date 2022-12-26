@@ -10,7 +10,7 @@ public class Day22 : StringBatchesDay
 
     private static Regex NumberPattern = new Regex(@"\d+");
 
-	protected override object FirstTask()
+    protected override object FirstTask()
     {
         var map = this.Input[0]
             .Split("\r ")
@@ -81,113 +81,20 @@ public class Day22 : StringBatchesDay
             {
                 Console.WriteLine();
             }
+            direction = 1;
+            var c = 0;
+            pos = (55, 20);
+            while (c < 200) {
+                pos = MakeMove(map, pos, ref direction);
+                c++;
+            }
             var steps = int.Parse(NumberPattern.Match(instruction).Captures.First().Value);
             for (int i = 0; i < steps; i++)
             {
-                var dir = GetDir(direction);
-                (var oldX, var oldY) = pos;
-                var newX = pos.x + dir.Item1;
-                var newY = pos.y + dir.Item2;
 
-                if (newY < 0)
+                (var newX, var newY) = MakeMove(map, pos, ref direction);
+                if (map[newY][newX] == Wall)
                 {
-                    if (newX >= 50 && newX < 100)
-                    {
-                        newY = 100 + newX;
-                        newX = 0;
-                        direction = 0;
-                    }
-                    else if (newX >= 100 && newX < 150)
-                    {
-                        newY = 199;
-                        newX = newX - 100;
-                    }
-                }
-                else if (newY >= 0 && newY < 50)
-                {
-                    if (newX >= 150)
-                    {
-                        newY = 149 - newY;
-                        newX = 99;
-                        direction = 2;
-                    }
-                    else if (newX < 50)
-                    {
-                        newY = 149 - newY;
-                        newX = 0;
-                        direction = 0;
-                    }
-                }
-                else if (newY >= 50 && newY < 100)
-                {
-                    if (newX >= 100 && direction == 0)
-                    {
-                        newX = 50 + newY;
-                        newY = 49;
-                        direction = 3;
-                    }
-                    else if (newX > 99 && direction == 1)
-                    {
-                        newY = newX - 50;
-                        newX = 99;
-                        direction = 2;
-                    }
-                    else if (newX < 50 && direction == 2)
-                    {
-                        newX = newY - 50;
-                        newY = 100;
-                        direction = 1;
-                    }
-                    else if (newX < 50 && direction == 3)
-                    {
-                        newY = 50 + newX;
-                        newX = 50;
-                        direction = 0;
-                    }
-                }
-                else if (newY >= 100 && newY < 150)
-                {
-                    if (newX < 0)
-                    {
-                        newY = 149 - newY;
-                        newX = 50;
-                        direction = 2;
-                    }
-                    else if (newX >= 100)
-                    {
-                        newY = 149 - newY;
-                        newX = 149;
-                        direction = 0;
-                    }
-                }
-                else if (newY >= 150 && newY < 200)
-                {
-                    if (newX < 0)
-                    {
-                        newX = newY - 100;
-                        newY = 0;
-                        direction = 1;
-                    }
-                    else if (newX >= 50 && newX < 100 && direction == 0)
-                    {
-                        newX = newY - 100;
-                        newY = 149;
-                        direction = 3;
-                    }
-                    else if (newX >= 50 && newX < 100 && direction == 1)
-                    {
-                        newY = 100 + newX;
-                        newX = 49;
-                        direction = 2;
-                    }
-                }
-                else if (newY >= 200)
-                {
-                    newY = 0;
-                    newX = 100 + newX;
-                }
-
-                if (map[newY][newX] == Wall) {
                     //Console.WriteLine($"Wall at X:{newX}, Y: {newY}");
                     break;
                 }
@@ -217,5 +124,113 @@ public class Day22 : StringBatchesDay
             2 => (-1, 0),
             3 => (0, -1),
         };
+    }
+
+    private (int x, int y) MakeMove(List<List<char>> map, (int x, int y) pos, ref int direction)
+    {
+        var dir = GetDir(direction);
+        (var oldX, var oldY) = pos;
+        var newX = pos.x + dir.Item1;
+        var newY = pos.y + dir.Item2;
+
+        if (newY < 0)
+        {
+            if (newX >= 50 && newX < 100)
+            {
+                newY = 100 + newX;
+                newX = 0;
+                direction = 2;
+            }
+            else if (newX >= 100 && newX < 150)
+            {
+                newY = 199;
+                newX = newX - 100;
+            }
+        }
+        else if (newY >= 0 && newY < 50)
+        {
+            if (newX >= 150)
+            {
+                newY = 149 - newY;
+                newX = 99;
+                direction = 2;
+            }
+            else if (newX < 50)
+            {
+                newY = 149 - newY;
+                newX = 0;
+                direction = 0;
+            }
+        }
+        else if (newY >= 50 && newY < 100)
+        {
+            if (newX >= 100 && direction == 0)
+            {
+                newX = 50 + newY;
+                newY = 49;
+                direction = 3;
+            }
+            else if (newX >= 100 && direction == 1)
+            {
+                newY = newX - 50;
+                newX = 99;
+                direction = 2;
+            }
+            else if (newX < 50 && direction == 2)
+            {
+                newX = newY - 50;
+                newY = 100;
+                direction = 1;
+            }
+            else if (newX < 50 && direction == 3)
+            {
+                newY = 50 + newX;
+                newX = 50;
+                direction = 0;
+            }
+        }
+        else if (newY >= 100 && newY < 150)
+        {
+            if (newX < 0)
+            {
+                newY = 149 - newY;
+                newX = 50;
+                direction = 0;
+            }
+            else if (newX >= 100)
+            {
+                newY = 149 - newY;
+                newX = 149;
+                direction = 2;
+            }
+        }
+        else if (newY >= 150 && newY < 200)
+        {
+            if (newX < 0)
+            {
+                newX = newY - 100;
+                newY = 0;
+                direction = 1;
+            }
+            else if (newX >= 50 && newX < 100 && direction == 0)
+            {
+                newX = newY - 100;
+                newY = 149;
+                direction = 3;
+            }
+            else if (newX >= 50 && newX < 100 && direction == 1)
+            {
+                newY = 100 + newX;
+                newX = 49;
+                direction = 2;
+            }
+        }
+        else if (newY >= 200)
+        {
+            newY = 0;
+            newX = 100 + newX;
+        }
+
+        return (newX, newY);
     }
 }
