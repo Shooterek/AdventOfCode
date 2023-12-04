@@ -51,7 +51,6 @@ public class Day3 : StringListDay
                     .ToArray();
                 if (adjacentNumbers.Length == 2)
                 {
-                    Console.WriteLine($"{adjacentNumbers[0].number}, {adjacentNumbers[1].number}");
                     sum += adjacentNumbers[0].number * adjacentNumbers[1].number;
                 }
             }
