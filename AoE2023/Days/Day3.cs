@@ -36,7 +36,28 @@ public class Day3 : StringListDay
 
     protected override object SecondTask()
     {
-        return null;
+        return this.Input.Select((text, lineIndex) => {
+            var regex = new Regex(@"\*");
+            var matches = regex.Matches(text);
+            var sum = 0;
+            foreach (Match match in matches) {
+                var adjacentSquares = GetAdjacentSquares(1, match.Index, lineIndex, this.Input.Count, this.Input.First().Length).ToArray();
+                var lines = adjacentSquares.Select(xy => xy.y).ToArray();
+                var x = adjacentSquares.Select(xy => xy.x).ToArray();
+                var adjacentNumbers = this.numbersPerLine
+                    .Where((n, y) => lines.Contains(y))
+                    .SelectMany(n => n)
+                    .Where(n => Enumerable.Range(n.characterIndex, n.number.ToString().Length).Intersect(x).Any())
+                    .ToArray();
+                if (adjacentNumbers.Length == 2)
+                {
+                    Console.WriteLine($"{adjacentNumbers[0].number}, {adjacentNumbers[1].number}");
+                    sum += adjacentNumbers[0].number * adjacentNumbers[1].number;
+                }
+            }
+            return sum;
+        })
+        .Sum();
     }
 
     private (int x, int y)[] GetAdjacentSquares(int lengthOfNumber, int index, int line, int maxHeight, int maxLength) {
