@@ -136,7 +136,7 @@ file record Transformer(long Start, long Destination, long Range)
             {
                 var processedRange = new CRange(this.Destination, this.Range);
                 var left = new CRange(r.Start, this.Start - r.Start);
-                var right = new CRange(r.End, r.End - this.End);
+                var right = new CRange(this.End, r.End - this.End);
                 unprocessedRanges.Add(left);
                 unprocessedRanges.Add(right);
                 result.Add(processedRange);
