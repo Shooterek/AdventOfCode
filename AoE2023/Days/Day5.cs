@@ -46,7 +46,7 @@ public class Day5 : StringBatchesDay
             .Split(" ", StringSplitOptions.RemoveEmptyEntries)
             .Select(long.Parse)
             .Chunk(2)
-            .Select(chunk => new CRange(chunk[0], chunk[1], -1))
+            .Select(chunk => new CRange(chunk[0], chunk[1]))
             .ToArray();
 
         var transformers = this.Input.Skip(1).Select(batch =>
@@ -60,7 +60,6 @@ public class Day5 : StringBatchesDay
 
         var locations = seeds.SelectMany(seed =>
         {
-            var gen = 0;
             var unprocessed = seeds.ToList().ToHashSet();
             foreach (var transformerList in transformers)
             {
@@ -71,7 +70,7 @@ public class Day5 : StringBatchesDay
                     ranges = new() {range};
                     foreach (var transformer in transformerList)
                     {
-                        var result = transformer.Transform(ranges, gen, out ranges);
+                        var result = transformer.Transform(ranges, out ranges);
                         foreach (var r in result) {
                             processed.Add(r);
                         }
@@ -95,7 +94,7 @@ file record Transformer(long Start, long Destination, long Range)
 {
     public long End => this.Start + this.Range - 1;
 
-    public IEnumerable<CRange> Transform(IEnumerable<CRange> rangesToTransform, int gen, out List<CRange> unprocessedRanges)
+    public IEnumerable<CRange> Transform(IEnumerable<CRange> rangesToTransform, out List<CRange> unprocessedRanges)
     {
         unprocessedRanges = new List<CRange>();
         var result = new List<CRange>();
@@ -104,14 +103,14 @@ file record Transformer(long Start, long Destination, long Range)
             if (r.Start >= this.Start && r.End <= this.End)
             {
                 var offset = r.Start - this.Start;
-                result.Add(r with { Start = this.Destination + offset, Generation = gen });
+                result.Add(r with { Start = this.Destination + offset });
             }
             // If range ends within the range of current transformer
             else if (r.End >= this.Start && r.End <= this.End)
             {
                 var processedLength = r.End - this.Start;
-                var unprocessedRange = new CRange(r.Start, r.Count - processedLength, gen);
-                var processedRange = new CRange(this.Destination, Math.Min(r.Count, processedLength), gen);
+                var unprocessedRange = new CRange(r.Start, r.Count - processedLength);
+                var processedRange = new CRange(this.Destination, Math.Min(r.Count, processedLength));
 
                 result.Add(processedRange);
                 if (unprocessedRange.Count > 0)
@@ -124,8 +123,8 @@ file record Transformer(long Start, long Destination, long Range)
             {
                 var processedLength = this.End - r.Start + 1;
                 var offset = r.Start - this.Start;
-                var unprocessedRange = new CRange(this.End + 1, r.Count - processedLength, gen);
-                var processedRange = new CRange(this.Destination + offset, processedLength, gen);
+                var unprocessedRange = new CRange(this.End + 1, r.Count - processedLength);
+                var processedRange = new CRange(this.Destination + offset, processedLength);
 
                 result.Add(processedRange);
                 if (unprocessedRange.Count > 0)
@@ -135,9 +134,9 @@ file record Transformer(long Start, long Destination, long Range)
             }
             else if (r.Start < this.Start && r.End > this.End)
             {
-                var processedRange = new CRange(this.Destination, this.Range, gen);
-                var left = new CRange(r.Start, this.Start - r.Start, gen);
-                var right = new CRange(r.End, r.End - this.End, gen);
+                var processedRange = new CRange(this.Destination, this.Range);
+                var left = new CRange(r.Start, this.Start - r.Start);
+                var right = new CRange(r.End, r.End - this.End);
                 unprocessedRanges.Add(left);
                 unprocessedRanges.Add(right);
                 result.Add(processedRange);
@@ -152,7 +151,7 @@ file record Transformer(long Start, long Destination, long Range)
     }
 }
 
-file record CRange(long Start, long Count, int Generation)
+file record CRange(long Start, long Count)
 {
     public long End => this.Start + this.Count - 1;
 }
