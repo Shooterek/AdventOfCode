@@ -10,7 +10,7 @@ public class DayBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        this.benchmarkedDay = new Day1();
+        this.benchmarkedDay = new Day5();
         this.benchmarkedDay.LoadInput();
     }
 
