@@ -10,25 +10,15 @@ public class Day6 : StringListDay
             .Select(line => line
                 .Split(" ", StringSplitOptions.RemoveEmptyEntries)
                 .Skip(1)
-                .Select(int.Parse)
+                .Select(long.Parse)
                 .ToArray())
             .ToArray();
         
         var timeDistance = numbers[0].Zip(numbers[1]);
-        var zeros = timeDistance.Select(td => {
-            var discriminant = td.First * td.First - (4 * td.Second);
-            var x1 = (-td.First - Math.Sqrt(discriminant))/(-2);
-            var x2 = (-td.First + Math.Sqrt(discriminant))/(-2);
-            return (x1, x2, t: td.First, d: td.Second);
-        });
+        var zeros = timeDistance.Select(td => CalculateRoots(td.First, td.Second));
 
-
-        var winningCombos = zeros.Select(z => {
-            var x1 = z.x1 % 1 == 0 ? z.x1 - 1 : Math.Floor(z.x1);
-            var x2 = z.x2 % 1 == 0 ? z.x2 + 1 : Math.Ceiling(z.x2);
-            return Math.Floor(x1) - Math.Ceiling(x2) + 1;
-        });
-        return winningCombos.Aggregate(1, (curr, next) => curr * (int)next);
+        var winningCombos = zeros.Select(GetNumberOfWinningTimePossibilites);
+        return winningCombos.Aggregate(1l, (curr, next) => curr * (long)next);
     }
 
     protected override object SecondTask()
@@ -43,19 +33,24 @@ public class Day6 : StringListDay
             .ToArray();
         
         var timeDistance = numbers[0].Zip(numbers[1]);
-        var zeros = timeDistance.Select(td => {
-            var discriminant = td.First * td.First - (4 * td.Second);
-            var x1 = (-td.First - Math.Sqrt(discriminant))/(-2);
-            var x2 = (-td.First + Math.Sqrt(discriminant))/(-2);
-            return (x1, x2, t: td.First, d: td.Second);
-        });
+        var zeros = timeDistance.Select(td => CalculateRoots(td.First, td.Second));
 
+        var winningCombos = zeros.Select(GetNumberOfWinningTimePossibilites);
+        return winningCombos.Aggregate(1l, (curr, next) => curr * (long)next);
+    }
 
-        var winningCombos = zeros.Select(z => {
-            var x1 = z.x1 % 1 == 0 ? z.x1 - 1 : Math.Floor(z.x1);
-            var x2 = z.x2 % 1 == 0 ? z.x2 + 1 : Math.Ceiling(z.x2);
-            return Math.Floor(x1) - Math.Ceiling(x2) + 1;
-        });
-        return winningCombos.Aggregate(1, (curr, next) => curr * (int)next);
+    private static (double x1, double x2) CalculateRoots(long totalTime, long distanceToBeat)
+    {
+        var discriminant = totalTime * totalTime - (4 * distanceToBeat);
+        var x1 = (-totalTime - Math.Sqrt(discriminant)) / (-2);
+        var x2 = (-totalTime + Math.Sqrt(discriminant)) / (-2);
+        return (x1, x2);
+    }
+
+    private static double GetNumberOfWinningTimePossibilites((double x1, double x2) z)
+    {
+        var x1 = z.x1 % 1 == 0 ? z.x1 - 1 : Math.Floor(z.x1);
+        var x2 = z.x2 % 1 == 0 ? z.x2 + 1 : Math.Ceiling(z.x2);
+        return Math.Floor(x1) - Math.Ceiling(x2) + 1;
     }
 }
