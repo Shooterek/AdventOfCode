@@ -10,18 +10,7 @@ public class Day7 : StringListDay
         var cards = this.Input.Select(line =>
         {
             var split = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-            var cardGroups = split[0].GroupBy(c => c).ToArray();
-            var groupCounts = cardGroups.Select(cg => cg.Count()).OrderDescending().ToArray();
-            var score = groupCounts switch
-            {
-                [var a] => 10,
-                [var a, var b] when a == 4 => 9,
-                [_, _] => 8,
-                [var a, var b, _] when a == 3 => 7,
-                [_, _, _] => 6,
-                [_, _, _, _] => 5,
-                _ => 4
-            };
+            var score = GetScore(split[0]);
             return (card: split[0], number: long.Parse(split[1]), score);
         });
 
@@ -35,20 +24,10 @@ public class Day7 : StringListDay
         var cards = this.Input.Select(line =>
         {
             var split = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-            var maxScore = split[0].Select(character => {
+            var maxScore = split[0].Select(character =>
+            {
                 var newString = split[0].Replace('J', character);
-                var cardGroups = newString.GroupBy(c => c).ToArray();
-                var groupCounts = cardGroups.Select(cg => cg.Count()).OrderDescending().ToArray();
-                return groupCounts switch
-                {
-                    [var a] => 10,
-                    [var a, var b] when a == 4 => 9,
-                    [_, _] => 8,
-                    [var a, var b, _] when a == 3 => 7,
-                    [_, _, _] => 6,
-                    [_, _, _, _] => 5,
-                    _ => 4
-                };
+                return GetScore(newString);
             })
                 .Max();
             return (card: split[0], number: long.Parse(split[1]), maxScore);
@@ -57,6 +36,22 @@ public class Day7 : StringListDay
         var x = cards.Order(new CardComparer(1));
 
         return x.Select((c, index) => c.number * (index + 1)).Sum();
+    }
+
+    private int GetScore(string input)
+    {
+        var cardGroups = input.GroupBy(c => c).ToArray();
+        var groupCounts = cardGroups.Select(cg => cg.Count()).OrderDescending().ToArray();
+        return groupCounts switch
+        {
+            [var a] => 10,
+            [var a, var b] when a == 4 => 9,
+            [_, _] => 8,
+            [var a, var b, _] when a == 3 => 7,
+            [_, _, _] => 6,
+            [_, _, _, _] => 5,
+            _ => 4
+        };
     }
 }
 
