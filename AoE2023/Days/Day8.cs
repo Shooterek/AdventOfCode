@@ -74,6 +74,37 @@ public class Day8 : StringBatchesDay
             }
         }
 
-        return solutions.Aggregate(1D, (curr, next) => curr * next.Value.First()) * instructions.Length;
+        var x = solutions.Select(s => (long)s.Value.First()).ToArray();
+        var lcm = FindLCM(x);
+
+        return FindLCM(x) * instructions.Length;
+    }
+
+    private long GCD(long a, long b)
+    {
+        while (b != 0)
+        {
+            long temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+
+    private long LCM(long a, long b)
+    {
+        return (a * b) / GCD(a, b);
+    }
+
+    private long FindLCM(long[] numbers)
+    {
+        long lcm = numbers[0];
+
+        for (long i = 1; i < numbers.Length; i++)
+        {
+            lcm = LCM(lcm, numbers[i]);
+        }
+
+        return lcm;
     }
 }
