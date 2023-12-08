@@ -64,7 +64,7 @@ public class Day8 : StringBatchesDay
                 stepCounter++;
 
                 if (currentPosition[2] == 'Z') {
-                    solutions[start].Add(stepCounter / instructions.Length);
+                    solutions[start].Add(stepCounter);
                     var result = cycles[start].Add($"{start}{currentPosition}{stepCounter % instructions.Length}");
                     if (!result) {
                         cycleIndexes.Add(stepCounter);
@@ -74,33 +74,33 @@ public class Day8 : StringBatchesDay
             }
         }
 
-        var x = solutions.Select(s => (long)s.Value.First()).ToArray();
+        var x = solutions.Select(s => (decimal)s.Value.First()).ToArray();
         var lcm = FindLCM(x);
 
-        return FindLCM(x) * instructions.Length;
+        return FindLCM(x);
     }
 
-    private long GCD(long a, long b)
+    private decimal GCD(decimal a, decimal b)
     {
         while (b != 0)
         {
-            long temp = b;
+            decimal temp = b;
             b = a % b;
             a = temp;
         }
         return a;
     }
 
-    private long LCM(long a, long b)
+    private decimal LCM(decimal a, decimal b)
     {
         return (a * b) / GCD(a, b);
     }
 
-    private long FindLCM(long[] numbers)
+    private decimal FindLCM(decimal[] numbers)
     {
-        long lcm = numbers[0];
+        decimal lcm = numbers[0];
 
-        for (long i = 1; i < numbers.Length; i++)
+        for (int i = 1; i < numbers.Length; i++)
         {
             lcm = LCM(lcm, numbers[i]);
         }
