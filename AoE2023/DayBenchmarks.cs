@@ -10,7 +10,8 @@ public class DayBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        this.benchmarkedDay = new Day8();
+        var currentDay = DateTime.Now.Day;
+        this.benchmarkedDay = (Day)Activator.CreateInstance(null, $"AoE2023.Day{Math.Min(25, currentDay)}").Unwrap();
         this.benchmarkedDay.LoadInput();
     }
 
