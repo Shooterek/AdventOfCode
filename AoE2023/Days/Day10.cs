@@ -36,7 +36,7 @@ public class Day10 : StringListDay
         }
 
         var step = 0;
-        var currentSquares = GetNeighbours(start, maxX, maxY, 'S').ToList();
+        var currentSquares = GetNeighbours(start, maxX, maxY, 'S').ToList().Take(1).ToList();
         var visitedSquares = new HashSet<(int x, int y)>();
         visitedSquares.Add(start);
         while (currentSquares.Count > 0)
@@ -46,7 +46,6 @@ public class Day10 : StringListDay
             {
                 if (!visitedSquares.Add(square))
                 {
-                    Console.WriteLine(step);
                     continue;
                 }
                 if (square.x == start.x && square.y == start.y)
@@ -63,7 +62,7 @@ public class Day10 : StringListDay
             nextIter.Clear();
         }
 
-        return step;
+        return Math.Ceiling((float)step / 2);
     }
 
     protected override object SecondTask()
@@ -83,7 +82,7 @@ public class Day10 : StringListDay
         }
 
         var step = 0;
-        var currentSquares = GetNeighbours(start, maxX, maxY, 'S').ToList();
+        var currentSquares = GetNeighbours(start, maxX, maxY, 'S').ToList().Take(1).ToList();
         var visitedSquares = new HashSet<(int x, int y)>();
         visitedSquares.Add(start);
         while (currentSquares.Count > 0)
@@ -93,7 +92,6 @@ public class Day10 : StringListDay
             {
                 if (!visitedSquares.Add(square))
                 {
-                    Console.WriteLine(step);
                     continue;
                 }
                 if (square.x == start.x && square.y == start.y)
@@ -125,27 +123,47 @@ public class Day10 : StringListDay
         wallSquares = wallSquares.Except(visitedSquares).ToHashSet();
 
         var nextSquares = wallSquares.ToHashSet();
-        while (nextSquares.Any()) {
+        while (nextSquares.Any())
+        {
             var next = nextSquares.SelectMany(sq => GetNeighbours(sq, maxX, maxY, 'S', false)).Distinct().ToArray();
             nextSquares.Clear();
-            foreach (var sq in next) {
-                if (!visitedSquares.Contains(sq) && wallSquares.Add(sq)) {
+            foreach (var sq in next)
+            {
+                if (!visitedSquares.Contains(sq) && wallSquares.Add(sq))
+                {
                     nextSquares.Add(sq);
                 }
             }
         }
 
         var allSquares = GenerateCoordinates(maxY, maxX).Except(wallSquares.Concat(visitedSquares));
+        foreach (var s in allSquares) {
+            this.map[s.y][s.x] = '.';
+        }
 
-        var result = allSquares.Where(sq => {
-            var wallCountLeft = Enumerable.Range(0, sq.x).Select(x => (x, sq.y)).Intersect(visitedSquares).Count();
-            var wallCountRight = Enumerable.Range(sq.x, maxX - sq.x).Select(x => (x, sq.y)).Intersect(visitedSquares).Count();
-            var wallCountTop = Enumerable.Range(0, sq.y).Select(y => (sq.x, y)).Intersect(visitedSquares).Count();
-            var wallCountDown = Enumerable.Range(sq.y, maxY - sq.y).Select(y => (sq.x, sq.y)).Intersect(visitedSquares).Count();
-            return (wallCountLeft % 2 == 1 || wallCountRight % 2 == 1) || (wallCountTop % 2 == 1 || wallCountDown % 2 == 1);
-        });
+        return null;
+        // return allSquares.Count(sq =>
+        // {
+        //     var alreadyVisited = new HashSet<(float x, float y)>();
+        //     var next = new List<(float x, float y)>() { sq };
+        //     while (next.Any())
+        //     {
+        //         HashSet<(float x, float y)> nextGen = new();
+        //         foreach (var n in next)
+        //         {
+        //             if (alreadyVisited.Add(n))
+        //             {
+        //                 foreach (var ng in GetAll(n, maxX, maxY))
+        //                 {
+        //                     nextGen.Add(ng);
+        //                 }
+        //             }
+        //         }
 
-        return result.Count();
+        //         next = nextGen.ToList();
+        //         nextGen.Clear();
+        //     }
+        // });
     }
 
     private IEnumerable<(int x, int y)> GetNeighbours((int x, int y) current, int maxX, int maxY, char symbol, bool validate = true)
@@ -163,8 +181,23 @@ public class Day10 : StringListDay
             .Select(pd => (x: current.x + pd.x, y: current.y + pd.y))
             .Where(c => c.x >= 0 && c.x < maxX && c.y >= 0 && c.y < maxY)
             .Where(c => !validate || GetNeighbours(c, maxX, maxY, this.map[c.y][c.x], false).Contains(current));
-    }   
-    
+    }
+
+    private IEnumerable<(float x, float y)> GetAll((float x, float y) current, int maxX, int maxY)
+    {
+        return new List<(float x, float y)>() {
+            (-.5f, -.5f),
+            (0f, -.5f),
+            (.5f, -.5f),
+            (-.5f, 0f),
+            (0f, 0f),
+            (.5f, 0f),
+            (-.5f, .5f),
+            (0f, .5f),
+            (.5f, .5f),
+        }.Select(change => (current.x + change.x, current.y + change.y));
+    }
+
     static List<(int x, int y)> GenerateCoordinates(int rows, int columns)
     {
         List<(int x, int y)> coordinates = new List<(int x, int y)>();
