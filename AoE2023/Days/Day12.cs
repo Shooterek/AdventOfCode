@@ -6,7 +6,6 @@ namespace AoE2023;
 
 public class Day12 : StringListDay
 {
-    private readonly Regex regex = new Regex(@"^\.*#+[\.|$]");
     private readonly Regex regex2 = new Regex(@"#+");
     protected override object FirstTask()
     {
@@ -22,29 +21,9 @@ public class Day12 : StringListDay
 
                 var springs = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
-                var permutations = GetPermutations(springs, condition, 0, 0).Distinct().ToArray();
+                var permutations = GetPermutations(condition, springs, condition, 0, 0).Distinct().ToArray();
 
                 return permutations.Where(c => ConditionSucceeded(condition, c)).Count();
-                IEnumerable<string> GetPermutations(string src, int[] numbers, int segmentIndex, int startFrom)
-                {
-                    var results = GetSegment(src, numbers[segmentIndex], startFrom).ToArray();
-                    foreach (var r in results)
-                    {
-                        if (segmentIndex + 1 == numbers.Length)
-                        {
-                            yield return r.Item1.Replace('?', '.');
-                        }
-                        else
-                        {
-
-                            var nextResults = GetPermutations(r.Item1, numbers, segmentIndex + 1, r.Item2).ToArray();
-                            foreach (var nr in nextResults)
-                            {
-                                yield return nr;
-                            }
-                        }
-                    }
-                }
             }).ToArray();
 
         return numbers.Sum();
@@ -68,29 +47,9 @@ public class Day12 : StringListDay
                 var springs = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
                 springs = string.Join("?", Enumerable.Range(0, 5).Select(s => springs));
-                var permutations = GetPermutations(springs, condition, 0, 0).Distinct().ToArray();
+                var permutations = GetPermutations(condition, springs, condition, 0, 0).Distinct().ToArray();
 
                 return permutations.Where(c => ConditionSucceeded(condition, c)).Count();
-                IEnumerable<string> GetPermutations(string src, int[] numbers, int segmentIndex, int startFrom)
-                {
-                    var results = GetSegment(src, numbers[segmentIndex], startFrom).ToArray();
-                    foreach (var r in results)
-                    {
-                        if (segmentIndex + 1 == numbers.Length)
-                        {
-                            yield return r.Item1.Replace('?', '.');
-                        }
-                        else
-                        {
-
-                            var nextResults = GetPermutations(r.Item1, numbers, segmentIndex + 1, r.Item2).ToArray();
-                            foreach (var nr in nextResults)
-                            {
-                                yield return nr;
-                            }
-                        }
-                    }
-                }
             }).ToArray();
 
         return numbers.Sum();
@@ -142,6 +101,26 @@ public class Day12 : StringListDay
                 return false;
         }
         return true;
+    }
+
+    private IEnumerable<string> GetPermutations(int[] condition, string src, int[] numbers, int segmentIndex, int startFrom)
+    {
+        var results = GetSegment(src, numbers[segmentIndex], startFrom).ToArray();
+        foreach (var r in results)
+        {
+            if (segmentIndex + 1 == numbers.Length)
+            {
+                yield return r.Item1.Replace('?', '.');
+            }
+            else
+            {
+                var nextResults = GetPermutations(condition, r.Item1, numbers, segmentIndex + 1, r.Item2).ToArray();
+                foreach (var nr in nextResults)
+                {
+                    yield return nr;
+                }
+            }
+        }
     }
 }
 
