@@ -55,6 +55,26 @@ public class Day12 : StringListDay
         return numbers.Sum();
     }
 
+    private IEnumerable<string> GetPermutations(int[] condition, string src, int[] numbers, int segmentIndex, int startFrom)
+    {
+        var results = GetSegment(src, numbers[segmentIndex], startFrom).ToArray();
+        foreach (var r in results)
+        {
+            if (segmentIndex + 1 == numbers.Length)
+            {
+                yield return r.Item1.Replace('?', '.');
+            }
+            else
+            {
+                var nextResults = GetPermutations(condition, r.Item1, numbers, segmentIndex + 1, r.Item2).ToArray();
+                foreach (var nr in nextResults)
+                {
+                    yield return nr;
+                }
+            }
+        }
+    }
+
     private IEnumerable<(string, int)> GetSegment(string src, int length, int startIndex)
     {
         for (int i = startIndex; i <= src.Length - length; i++)
@@ -80,7 +100,6 @@ public class Day12 : StringListDay
 
                 yield return (result, segmentEndIndex + 1);
             }
-
         }
 
         bool CanStart(int index) => index == 0 || src[index - 1] == '?' || src[index - 1] == '.';
@@ -101,26 +120,6 @@ public class Day12 : StringListDay
                 return false;
         }
         return true;
-    }
-
-    private IEnumerable<string> GetPermutations(int[] condition, string src, int[] numbers, int segmentIndex, int startFrom)
-    {
-        var results = GetSegment(src, numbers[segmentIndex], startFrom).ToArray();
-        foreach (var r in results)
-        {
-            if (segmentIndex + 1 == numbers.Length)
-            {
-                yield return r.Item1.Replace('?', '.');
-            }
-            else
-            {
-                var nextResults = GetPermutations(condition, r.Item1, numbers, segmentIndex + 1, r.Item2).ToArray();
-                foreach (var nr in nextResults)
-                {
-                    yield return nr;
-                }
-            }
-        }
     }
 }
 
