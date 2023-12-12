@@ -1,5 +1,6 @@
 using AoE2023.Utils;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace AoE2023;
 
@@ -19,43 +20,27 @@ public class Day12 : StringListDay
                     .Select(int.Parse)
                     .ToArray();
 
-                var permutations = GetPermutations(line, 0, 0, "");
+                var springs = line
+                    .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
+                var permutations = GetPermutations(springs, condition, 0, 0).Distinct().ToArray();
 
-                Console.WriteLine(line);
                 return permutations.Where(c => ConditionSucceeded(condition, c)).Count();
-                IEnumerable<string> GetPermutations(string src, int startFrom, int segment, string prefix)
+                IEnumerable<string> GetPermutations(string src, int[] numbers, int segmentIndex, int startFrom)
                 {
-                    if (SegmentMatched(condition, src, segment, out var index) is { } length)
+                    var results = GetSegment(src, numbers[segmentIndex], startFrom).ToArray();
+                    foreach (var r in results)
                     {
-                        prefix += src.Substring(0, length);
-                        src = src.ReplaceAt(0, length, "");
-                        segment++;
-                        startFrom = 0;
-                    }
-                    var nextIndex = startFrom + 1;
-                    if (src.All(c => c != '?'))
-                        yield return prefix + src;
-
-                    foreach (var c in src.Select((s, i) => (s, i)).Where(s => s.i >= startFrom && s.s == '?'))
-                    {
-                        var next = src.ReplaceAt(c.i, 1, "#");
-                        var next2 = src.ReplaceAt(c.i, 1, ".");
-
-                        if (!ConditionFailed(condition, next, segment))
+                        if (segmentIndex + 1 == numbers.Length)
                         {
-                            var result = GetPermutations(next, c.i + 1, segment, prefix).ToArray();
-                            foreach (var r in result)
-                            {
-                                yield return r;
-                            }
+                            yield return r.Item1.Replace('?', '.');
                         }
-
-                        if (!ConditionFailed(condition, next2, segment))
+                        else
                         {
-                            var result = GetPermutations(next2, c.i + 1, segment, prefix).ToArray();
-                            foreach (var r in result)
+
+                            var nextResults = GetPermutations(r.Item1, numbers, segmentIndex + 1, r.Item2).ToArray();
+                            foreach (var nr in nextResults)
                             {
-                                yield return r;
+                                yield return nr;
                             }
                         }
                     }
@@ -67,40 +52,80 @@ public class Day12 : StringListDay
 
     protected override object SecondTask()
     {
-        return null;
+        var numbers = this.Input
+            .Select((line, index) =>
+            {
+                var condition = line
+                    .Split(" ", StringSplitOptions.RemoveEmptyEntries)
+                    .Skip(1).First()
+                    .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                    .Select(int.Parse)
+                    .ToArray();
+
+                Console.WriteLine(index);
+                condition = Enumerable.Range(0, 5).SelectMany(c => condition).ToArray();
+
+                var springs = line
+                    .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
+                springs = string.Join("?", Enumerable.Range(0, 5).Select(s => springs));
+                var permutations = GetPermutations(springs, condition, 0, 0).Distinct().ToArray();
+
+                return permutations.Where(c => ConditionSucceeded(condition, c)).Count();
+                IEnumerable<string> GetPermutations(string src, int[] numbers, int segmentIndex, int startFrom)
+                {
+                    var results = GetSegment(src, numbers[segmentIndex], startFrom).ToArray();
+                    foreach (var r in results)
+                    {
+                        if (segmentIndex + 1 == numbers.Length)
+                        {
+                            yield return r.Item1.Replace('?', '.');
+                        }
+                        else
+                        {
+
+                            var nextResults = GetPermutations(r.Item1, numbers, segmentIndex + 1, r.Item2).ToArray();
+                            foreach (var nr in nextResults)
+                            {
+                                yield return nr;
+                            }
+                        }
+                    }
+                }
+            }).ToArray();
+
+        return numbers.Sum();
     }
 
-    private int? SegmentMatched(int[] numbers, string src, int segment, out int? index)
+    private IEnumerable<(string, int)> GetSegment(string src, int length, int startIndex)
     {
-        index = null;
-        var matches = this.regex.Match(src);
-        if (!matches.Success)
-            return null;
-        if (matches.Value.Count(c => c == '#') == numbers[segment])
+        for (int i = startIndex; i <= src.Length - length; i++)
         {
-            index = matches.Index;
-            return matches.Length;
+            if (!CanStart(i) || !CanEnd(i + length - 1))
+                continue;
+
+            var segment = src.Substring(i, length);
+            if (segment.All(c => c != '.'))
+            {
+                var next = new StringBuilder();
+                next.Append(src.Substring(0, i).Replace('?', '.'));
+
+                for (int z = 0; z < length; z++)
+                {
+                    next.Append('#');
+                }
+                next.Append(src.Substring(i + length));
+                var result = next.ToString();
+                var segmentEndIndex = i + length - 1;
+                if (segmentEndIndex != src.Length - 1 && src[segmentEndIndex + 1] == '?')
+                    result = result.ReplaceAt(segmentEndIndex + 1, 1, ".");
+
+                yield return (result, segmentEndIndex + 1);
+            }
+
         }
 
-        return null;
-    }
-
-    private bool ConditionFailed(int[] numbers, string src, int segment)
-    {
-        var matches = this.regex.Match(src);
-        if (!matches.Success)
-            return false;
-
-        if (segment >= numbers.Length )
-            return true;
-
-        if (matches.Value.Length > numbers[segment])
-            return false;
-
-        var missingHashes = numbers.Skip(segment).Sum();
-        var allHashes = src.Count(c => c == '#');
-        var allQuestionsMarks = src.Count(c => c == '?');
-        return allHashes > missingHashes || allHashes + allQuestionsMarks < missingHashes;
+        bool CanStart(int index) => index == 0 || src[index - 1] == '?' || src[index - 1] == '.';
+        bool CanEnd(int index) => index == src.Length - 1 || src[index + 1] == '?' || src[index + 1] == '.';
     }
 
     private bool ConditionSucceeded(int[] numbers, string src)
