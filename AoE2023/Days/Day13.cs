@@ -16,13 +16,13 @@ public class Day13 : StringBatchesDay
 
         var columnNumbers = grids.Select(gr => RotateJaggedArrayCounterClockwise(gr))
             .Select(row => row.Select(src => long.Parse(string.Join("", src))).ToArray()).ToArray();
-        var rowSplitPoints = rowNumbers.Select(NewMethod).ToArray();
-        var columnSplits = columnNumbers.Select(NewMethod).ToArray();
+        var rowSplitPoints = rowNumbers.Select(FindReflectionPoint).ToArray();
+        var columnSplits = columnNumbers.Select(FindReflectionPoint).ToArray();
 
         return columnSplits.Sum() + rowSplitPoints.Sum(val => val * 100);
     }
 
-    private static int NewMethod(long[] gr)
+    private static int FindReflectionPoint(long[] gr)
     {
         for (int i = 0; i < gr.Length - 1; i++)
         {
