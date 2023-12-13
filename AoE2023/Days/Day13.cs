@@ -19,7 +19,7 @@ public class Day13 : StringBatchesDay
         var rowSplitPoints = rowNumbers.Select(FindReflectionPoint).ToArray();
         var columnSplits = columnNumbers.Select(FindReflectionPoint).ToArray();
 
-        return columnSplits.Sum() + rowSplitPoints.Sum(val => val * 100);
+        return columnSplits.Select(r => r.FirstOrDefault()).Sum() + rowSplitPoints.Select(r => r.FirstOrDefault()).Sum(val => val * 100);
     }
 
     protected override object SecondTask()
@@ -34,7 +34,8 @@ public class Day13 : StringBatchesDay
 
         var columnNumbers = grids.Select(gr => RotateJaggedArrayCounterClockwise(gr))
             .Select(row => row.Select(src => long.Parse(string.Join("", src))).ToArray()).ToArray();
-        var splitPoints = rowNumbers.Select(FindReflectionPoint).Zip(columnNumbers.Select(FindReflectionPoint), grids).ToArray();
+        var splitPoints = rowNumbers.Select(c => FindReflectionPoint(c).FirstOrDefault())
+            .Zip(columnNumbers.Select(c => FindReflectionPoint(c).FirstOrDefault()), grids).ToArray();
         var sp = splitPoints.Select(s =>
         {
             var src = s.Third;
@@ -50,14 +51,16 @@ public class Day13 : StringBatchesDay
                     var rowNumbers2 = copy.Select(src => long.Parse(string.Join("", src))).ToArray();
 
                     var columnNumbers2 = RotateJaggedArrayCounterClockwise(copy).Select(src => long.Parse(string.Join("", src))).ToArray();
-                    var rowSplitPoints2 = FindReflectionPoint2(rowNumbers2).Where(r => r != 0 && r != s.First).ToArray();
-                    var columnSplits2 = FindReflectionPoint2(columnNumbers2).Where(r => r != 0 && r != s.Second).ToArray();
+                    var rowSplitPoints2 = FindReflectionPoint(rowNumbers2).Where(r => r != 0 && r != s.First).ToArray();
+                    var columnSplits2 = FindReflectionPoint(columnNumbers2).Where(r => r != 0 && r != s.Second).ToArray();
 
-                    if (rowSplitPoints2.FirstOrDefault() is {} f && f > 0) {
+                    if (rowSplitPoints2.FirstOrDefault() is { } f && f > 0)
+                    {
                         resultsX.Add(f);
                     }
 
-                    if (columnSplits2.FirstOrDefault() is {} c && c > 0) {
+                    if (columnSplits2.FirstOrDefault() is { } c && c > 0)
+                    {
                         resultsY.Add(c);
                     }
                 }
@@ -99,7 +102,7 @@ public class Day13 : StringBatchesDay
         var rowSplitPoints = rowNumbers.Select(FindReflectionPoint).ToArray();
         var columnSplits = columnNumbers.Select(FindReflectionPoint).ToArray();
 
-        return columnSplits.Sum() + rowSplitPoints.Sum(val => val * 100);
+        return columnSplits.Sum(s => s.FirstOrDefault()) + rowSplitPoints.Sum(val => val.FirstOrDefault() * 100);
     }
 
     static T[][] RotateJaggedArrayCounterClockwise<T>(T[][] jaggedArray)
@@ -132,39 +135,7 @@ public class Day13 : StringBatchesDay
         return transposedArray;
     }
 
-    private static int FindReflectionPoint(long[] gr)
-    {
-        for (int i = 0; i < gr.Length - 1; i++)
-        {
-            var current = gr[i];
-            var next = gr[i + 1];
-            if (current != next)
-                continue;
-
-            var lower = i;
-            var upper = i + 1;
-            while (lower >= 0 && upper <= gr.Length - 1)
-            {
-                current = gr[lower];
-                next = gr[upper];
-
-                if (current != next)
-                    break;
-
-                lower--;
-                upper++;
-            }
-
-            if (current == next)
-            {
-                return i + 1;
-            }
-        }
-
-        return 0;
-    }
-
-        private static IEnumerable<int> FindReflectionPoint2(long[] gr)
+    private static IEnumerable<int> FindReflectionPoint(long[] gr)
     {
         for (int i = 0; i < gr.Length - 1; i++)
         {
