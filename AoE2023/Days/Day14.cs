@@ -6,27 +6,59 @@ public class Day14 : StringListDay
 {
     protected override object FirstTask()
     {
-        var map = RotateJaggedArrayCounterClockwise(this.Input.Select(line => line.ToCharArray()).ToArray());
-        for (int i = 0; i < map.Length; i++) {
-            for(int j = 0; j < map[i].Length; j++) {
-                for (int k = j; k > 0; k--) {
-                    if (map[i][k] == 'O' && map[i][k - 1] == '.') {
-                        map[i][k - 1] = 'O';
-                        map[i][k] = '.';
-                    }
-                    else {
-                        continue;
-                    }
-                }
-            }
-        }
-
+        var map = this.Input.Select(line => line.ToCharArray()).ToArray();
+        map = RotateJaggedArrayCounterClockwise(map);
+        MoveWest(map);
         return map.Select(line => line.Select((c, index) => c == 'O' ? line.Length - index : 0).Sum()).Sum();
     }
 
     protected override object SecondTask()
     {
         return null;
+    }
+
+    private void MoveWest(char[][] map)
+    {
+        for (int i = 0; i < map.Length; i++)
+        {
+            for (int j = 0; j < map[i].Length; j++)
+            {
+                for (int k = j; k > 0; k--)
+                {
+                    if (map[i][k] == 'O' && map[i][k - 1] == '.')
+                    {
+                        map[i][k - 1] = 'O';
+                        map[i][k] = '.';
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
+    private void MoveEast(char[][] map)
+    {
+        for (int i = 0; i < map.Length; i++)
+        {
+            for (int j = map[i].Length - 1; j >= 0; j--)
+            {
+                for (int k = j; k < map[i].Length - 1; k++)
+                {
+                    if (map[i][k] == 'O' && map[i][k + 1] == '.')
+                    {
+                        map[i][k + 1] = 'O';
+                        map[i][k] = '.';
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
+        }
     }
 
     static T[][] RotateJaggedArrayCounterClockwise<T>(T[][] jaggedArray)
