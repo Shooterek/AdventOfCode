@@ -18,37 +18,30 @@ public class Day14 : StringListDay
 
     protected override object SecondTask()
     {
-        var dictionary = new Dictionary<(string, int), (int, int)>();
-        var totalCycles = 4 * 1000000000L;
+        var dictionary = new Dictionary<string, (int, int)>();
+        var totalCycles = 1000000000L;
         var index = 0;
         var direction = 0;
 
         var map = this.Input.Select(line => line.ToCharArray()).ToArray();
         while (true)
         {
-            Action<char[][]> func = (direction % 4) switch
-            {
-                0 => MoveNorth,
-                1 => MoveWest,
-                2 => MoveSouth,
-                3 => MoveEast,
-            };
+            MoveNorth(map);
+            MoveWest(map);
+            MoveSouth(map);
+            MoveEast(map);
 
-            func(map);
             var representation = GetString(map);
-            if (dictionary.ContainsKey((representation, direction)))
+            if (dictionary.ContainsKey(representation))
             {
-                Console.WriteLine(index);
-                var cycleBeginning = dictionary[(representation, direction)].Item1;
+                var cycleBeginning = dictionary[representation].Item1;
                 var cycleLength = index - cycleBeginning;
                 var fullCycles = (totalCycles - cycleBeginning) / cycleLength;
 
-
-                return dictionary.First(kv => kv.Value.Item1 == totalCycles - fullCycles * cycleLength - cycleBeginning).Value.Item2;
+                return dictionary.Values.ToArray()[cycleBeginning..(cycleBeginning + cycleLength)][totalCycles - fullCycles * cycleLength - cycleBeginning - 1].Item2;
             }
 
-            dictionary.Add((representation, direction), (index, CalculateScore(map)));
-            direction = (direction + 1) % 4;
+            dictionary.Add(representation, (index, CalculateScore(map)));
             index++;
         }
     }
@@ -176,17 +169,5 @@ public class Day14 : StringListDay
 
         // Update the original jagged array with the rotated values
         return transposedArray;
-    }
-
-    static void PrintJaggedArray(char[][] array)
-    {
-        for (int i = 0; i < array.Length; i++)
-        {
-            for (int j = 0; j < array[i].Length; j++)
-            {
-                Console.Write(array[i][j] + " ");
-            }
-            Console.WriteLine();
-        }
     }
 }
