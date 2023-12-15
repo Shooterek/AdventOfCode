@@ -24,7 +24,7 @@ public class Day12 : StringListDay
 
                 var springs = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
-                var permutations = GetPermutations(condition, springs, condition, 0, 0);
+                var permutations = GetPermutations(condition, springs, condition, 0, 0, condition.Sum());
 
                 return permutations;
             }).ToArray();
@@ -51,7 +51,7 @@ public class Day12 : StringListDay
                 var springs = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
                 springs = string.Join("?", Enumerable.Range(0, 5).Select(s => springs));
-                var permutations = GetPermutations(condition, springs, condition, 0, 0);
+                var permutations = GetPermutations(condition, springs, condition, 0, 0, condition.Sum());
 
                 return permutations;
             }).ToArray();
@@ -59,32 +59,33 @@ public class Day12 : StringListDay
         return numbers.Sum();
     }
 
-    private long GetPermutations(int[] condition, string src, int[] numbers, int segmentIndex, int startFrom)
+    private long GetPermutations(int[] condition, string src, int[] numbers, int segmentIndex, int startFrom, int totalLength)
     {
-        if (this.cache.GetValueOrDefault((src, segmentIndex, startFrom)) is {} cachedValue)
-            return cachedValue;
-        var results = GetSegment(src, numbers[segmentIndex], startFrom).ToArray();
+        var results = GetSegment(src, numbers[segmentIndex], startFrom, totalLength).ToArray();
         var sum = 0L;
         foreach (var r in results)
         {
             if (segmentIndex + 1 == numbers.Length)
             {
                 var result = r.Item1.Replace('?', '.');
-                if (ConditionSucceeded(condition, result))
+                if (ConditionSucceeded(condition, result)) {
                     sum += 1;
+                }
             }
             else
             {
-                sum += GetPermutations(condition, r.Item1, numbers, segmentIndex + 1, r.Item2);
+                sum += GetPermutations(condition, r.Item1, numbers, segmentIndex + 1, r.Item2, totalLength);
             }
         }
 
-        this.cache.TryAdd((src, segmentIndex, startFrom), sum);
         return sum;
     }
 
-    private IEnumerable<(string, int)> GetSegment(string src, int length, int startIndex)
+    private IEnumerable<(string, int)> GetSegment(string src, int length, int startIndex, int totalLength)
     {
+        if (src.Count(c => c == '?' || c == '#') < totalLength)
+            yield break;
+
         for (int i = startIndex; i <= src.Length - length; i++)
         {
             if (!CanStart(i) || !CanEnd(i + length - 1))
