@@ -93,7 +93,7 @@ public class Day12 : StringListDay
 
             var segment = src.Substring(i, length);
 
-            if (segment.All(c => c != '.'))
+            if (src.IndexOf('.', i, length) == -1)
             {
                 var segmentEndIndex = i + length;
                 if (segmentEndIndex != src.Length && src[segmentEndIndex] == '?')
