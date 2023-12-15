@@ -8,7 +8,7 @@ namespace AoE2023;
 public class Day12 : StringListDay
 {
     private readonly Regex regex2 = new Regex(@"#+");
-    private readonly Dictionary<(string, int, int), long?> cache = new();
+    private readonly Dictionary<(string, int), long?> cache = new();
     protected override object FirstTask()
     {
         var numbers = this.Input
@@ -25,7 +25,6 @@ public class Day12 : StringListDay
                 var springs = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
                 var permutations = GetPermutations(condition, springs, condition, 0);
-                Console.WriteLine(permutations);
 
                 return permutations;
             }).ToArray();
@@ -46,14 +45,12 @@ public class Day12 : StringListDay
                     .Select(int.Parse)
                     .ToArray();
 
-                Console.WriteLine(index);
                 condition = Enumerable.Range(0, 5).SelectMany(c => condition).ToArray();
 
                 var springs = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
                 springs = string.Join("?", Enumerable.Range(0, 5).Select(s => springs));
                 var permutations = GetPermutations(condition, springs, condition, 0);
-                Console.WriteLine(permutations);
 
                 return permutations;
             }).ToArray();
@@ -63,6 +60,9 @@ public class Day12 : StringListDay
 
     private long GetPermutations(int[] condition, string src, int[] numbers, int segmentIndex)
     {
+        if (this.cache.GetValueOrDefault((src, segmentIndex)) is {} cachedValue)
+            return cachedValue;
+
         var results = GetSegment(src, numbers[segmentIndex]).ToArray();
         var sum = 0L;
         foreach (var r in results)
@@ -79,6 +79,7 @@ public class Day12 : StringListDay
             }
         }
 
+        this.cache.Add((src, segmentIndex), sum);
         return sum;
     }
 
@@ -106,30 +107,5 @@ public class Day12 : StringListDay
 
         bool CanStart(int index) => index == 0 || (src[index - 1] == '?' || src[index - 1] == '.') && src[0..index].All(c => c != '#');
         bool CanEnd(int index) => index == src.Length - 1 || src[index + 1] == '?' || src[index + 1] == '.';
-    }
-
-    private bool ConditionSucceeded(int[] numbers, string src)
-    {
-        var matches = this.regex2.Matches(src);
-        var index = 0;
-        var matchCount = matches.Count();
-        if (matchCount != numbers.Length)
-            return false;
-
-        foreach (Match match in matches)
-        {
-            if (match.Value.Length != numbers[index++])
-                return false;
-        }
-        return true;
-    }
-}
-
-public static class StringExtensions
-{
-    public static string ReplaceAt(this string str, int index, int length, string replace)
-    {
-        return str.Remove(index, Math.Min(length, str.Length - index))
-                .Insert(index, replace);
     }
 }
