@@ -60,7 +60,7 @@ public class Day12 : StringListDay
 
     private long GetPermutations(int[] condition, string src, int[] numbers, int segmentIndex)
     {
-        if (this.cache.GetValueOrDefault((src, segmentIndex)) is {} cachedValue)
+        if (this.cache.GetValueOrDefault((src, segmentIndex)) is { } cachedValue)
             return cachedValue;
 
         var results = GetSegment(src, numbers[segmentIndex]).ToArray();
@@ -69,7 +69,8 @@ public class Day12 : StringListDay
         {
             if (segmentIndex + 1 == numbers.Length)
             {
-                if (r.All(r => r != '#')) {
+                if (r.All(r => r != '#'))
+                {
                     sum += 1;
                 }
             }
@@ -105,7 +106,12 @@ public class Day12 : StringListDay
                 yield break;
         }
 
-        bool CanStart(int index) => index == 0 || (src[index - 1] == '?' || src[index - 1] == '.') && src[0..index].All(c => c != '#');
+        bool CanStart(int index)
+        {
+            var indexOfHash = src.IndexOf('#', 0, index);
+            return index == 0 || (src[index - 1] == '?' || src[index - 1] == '.') && indexOfHash == -1;
+        }
+
         bool CanEnd(int index) => index == src.Length - 1 || src[index + 1] == '?' || src[index + 1] == '.';
     }
 }
