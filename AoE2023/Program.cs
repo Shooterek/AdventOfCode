@@ -12,7 +12,7 @@ internal class Program
         }
 
         var currentDay = DateTime.Now.Day;
-        var day = (Day)Activator.CreateInstance(null, $"AoE2023.Day{10}").Unwrap();
+        var day = (Day)Activator.CreateInstance(null, $"AoE2023.Day{12}").Unwrap();
 
         day.RunFirstTask();
 
