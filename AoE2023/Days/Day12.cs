@@ -24,7 +24,8 @@ public class Day12 : StringListDay
 
                 var springs = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
-                var permutations = GetPermutations(condition, springs, condition, 0, 0, condition.Sum());
+                var permutations = GetPermutations(condition, springs, condition, 0);
+                Console.WriteLine(permutations);
 
                 return permutations;
             }).ToArray();
@@ -51,7 +52,8 @@ public class Day12 : StringListDay
                 var springs = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
                 springs = string.Join("?", Enumerable.Range(0, 5).Select(s => springs));
-                var permutations = GetPermutations(condition, springs, condition, 0, 0, condition.Sum());
+                var permutations = GetPermutations(condition, springs, condition, 0);
+                Console.WriteLine(permutations);
 
                 return permutations;
             }).ToArray();
@@ -59,59 +61,50 @@ public class Day12 : StringListDay
         return numbers.Sum();
     }
 
-    private long GetPermutations(int[] condition, string src, int[] numbers, int segmentIndex, int startFrom, int totalLength)
+    private long GetPermutations(int[] condition, string src, int[] numbers, int segmentIndex)
     {
-        var results = GetSegment(src, numbers[segmentIndex], startFrom, totalLength).ToArray();
+        var results = GetSegment(src, numbers[segmentIndex]).ToArray();
         var sum = 0L;
         foreach (var r in results)
         {
             if (segmentIndex + 1 == numbers.Length)
             {
-                var result = r.Item1.Replace('?', '.');
-                if (ConditionSucceeded(condition, result)) {
+                if (r.All(r => r != '#')) {
                     sum += 1;
                 }
             }
-            else
+            else if (r.Any(c => c == '?' || c == '#'))
             {
-                sum += GetPermutations(condition, r.Item1, numbers, segmentIndex + 1, r.Item2, totalLength);
+                sum += GetPermutations(condition, r, numbers, segmentIndex + 1);
             }
         }
 
         return sum;
     }
 
-    private IEnumerable<(string, int)> GetSegment(string src, int length, int startIndex, int totalLength)
+    private IEnumerable<string> GetSegment(string src, int length)
     {
-        if (src.Count(c => c == '?' || c == '#') < totalLength)
-            yield break;
-
-        for (int i = startIndex; i <= src.Length - length; i++)
+        for (int i = 0; i <= src.Length - length; i++)
         {
             if (!CanStart(i) || !CanEnd(i + length - 1))
                 continue;
 
             var segment = src.Substring(i, length);
+
             if (segment.All(c => c != '.'))
             {
-                var next = new StringBuilder();
-                next.Append(src.Substring(0, i).Replace('?', '.'));
+                var segmentEndIndex = i + length;
+                if (segmentEndIndex != src.Length && src[segmentEndIndex] == '?')
+                    segmentEndIndex += 1;
 
-                for (int z = 0; z < length; z++)
-                {
-                    next.Append('#');
-                }
-                next.Append(src.Substring(i + length));
-                var result = next.ToString();
-                var segmentEndIndex = i + length - 1;
-                if (segmentEndIndex != src.Length - 1 && src[segmentEndIndex + 1] == '?')
-                    result = result.ReplaceAt(segmentEndIndex + 1, 1, ".");
-
-                yield return (result, segmentEndIndex + 1);
+                var remainder = src[segmentEndIndex..];
+                yield return remainder;
             }
+            if (segment.All(c => c == '#'))
+                yield break;
         }
 
-        bool CanStart(int index) => index == 0 || src[index - 1] == '?' || src[index - 1] == '.';
+        bool CanStart(int index) => index == 0 || (src[index - 1] == '?' || src[index - 1] == '.') && src[0..index].All(c => c != '#');
         bool CanEnd(int index) => index == src.Length - 1 || src[index + 1] == '?' || src[index + 1] == '.';
     }
 
