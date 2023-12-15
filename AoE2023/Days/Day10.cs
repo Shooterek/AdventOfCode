@@ -1,6 +1,5 @@
 using AoE2023.Utils;
 using System.Collections.Immutable;
-using System.Text.RegularExpressions;
 
 namespace AoE2023;
 
@@ -100,6 +99,7 @@ public class Day10 : StringListDay
         borderSquares.AddRange(midpoints);
 
         var wallSquares = new HashSet<(int x, int y)>();
+        var borderSquaresSet = borderSquares.ToHashSet();
         foreach (var x in Enumerable.Range(0, maxX))
         {
             wallSquares.Add((x, 0));
@@ -120,7 +120,7 @@ public class Day10 : StringListDay
             nextSquares.Clear();
             foreach (var sq in next)
             {
-                if (!borderSquares.Contains(sq) && wallSquares.Add(sq))
+                if (!borderSquaresSet.Contains(sq) && wallSquares.Add(sq))
                 {
                     nextSquares.Add(sq);
                 }
@@ -163,24 +163,5 @@ public class Day10 : StringListDay
         int midY = (coord1.Y + coord2.Y) / 2;
 
         return new(midX, midY);
-    }
-
-    static void Print2DMap(int maxX, int maxY, List<(int, int)> coordinates)
-    {
-        for (int y = 0; y < maxY; y++)
-        {
-            for (int x = 0; x < maxX; x++)
-            {
-                if (coordinates.Contains((x, y)))
-                {
-                    Console.Write("# ");
-                }
-                else
-                {
-                    Console.Write(". ");
-                }
-            }
-            Console.WriteLine();
-        }
     }
 }

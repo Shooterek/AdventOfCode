@@ -11,7 +11,7 @@ public class DayBenchmarks
     public void Setup()
     {
         var currentDay = DateTime.Now.Day;
-        this.benchmarkedDay = (Day)Activator.CreateInstance(null, $"AoE2023.Day{Math.Min(25, currentDay)}").Unwrap();
+        this.benchmarkedDay = (Day)Activator.CreateInstance(null, $"AoE2023.Day{Math.Min(25, 10)}").Unwrap();
         this.benchmarkedDay.LoadInput();
     }
 
