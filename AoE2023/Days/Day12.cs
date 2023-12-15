@@ -91,8 +91,6 @@ public class Day12 : StringListDay
             if (!CanStart(i) || !CanEnd(i + length - 1))
                 continue;
 
-            var segment = src.Substring(i, length);
-
             if (src.IndexOf('.', i, length) == -1)
             {
                 var segmentEndIndex = i + length;
@@ -102,7 +100,8 @@ public class Day12 : StringListDay
                 var remainder = src[segmentEndIndex..];
                 yield return remainder;
             }
-            if (segment.All(c => c == '#'))
+
+            if (AllHashes(src, i, length))
                 yield break;
         }
 
@@ -113,5 +112,16 @@ public class Day12 : StringListDay
         }
 
         bool CanEnd(int index) => index == src.Length - 1 || src[index + 1] == '?' || src[index + 1] == '.';
+
+        static bool AllHashes(string src, int start, int length)
+        {
+            for (int i = start; i < start + length; i++)
+            {
+                if (src[i] != '#')
+                    return false;
+            }
+
+            return true;
+        }
     }
 }
