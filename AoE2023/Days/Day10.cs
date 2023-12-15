@@ -1,4 +1,5 @@
 using AoE2023.Utils;
+using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
 namespace AoE2023;
@@ -35,34 +36,19 @@ public class Day10 : StringListDay
             }
         }
 
-        var step = 0;
-        var currentSquares = GetNeighbours(start, maxX, maxY, 'S').ToList().Take(1).ToList();
         var visitedSquares = new HashSet<(int x, int y)>();
-        visitedSquares.Add(start);
-        while (currentSquares.Count > 0)
+        var square = start;
+        while (true)
         {
-            var nextIter = new List<(int x, int y)>();
-            foreach (var square in currentSquares)
+            visitedSquares.Add(square);
+            square = GetNeighbours(square, maxX, maxY, map[square.y][square.x]).FirstOrDefault(x => !visitedSquares.Contains(x), (-1, -1));
+            if (square.x == -1)
             {
-                if (!visitedSquares.Add(square))
-                {
-                    continue;
-                }
-                if (square.x == start.x && square.y == start.y)
-                {
-                    currentSquares.Clear();
-                    break;
-                }
-                nextIter.AddRange(GetNeighbours(square, maxX, maxY, map[square.y][square.x]));
+                break;
             }
-            step++;
-
-            currentSquares.Clear();
-            currentSquares.AddRange(nextIter.Where(sq => !visitedSquares.Contains(sq)));
-            nextIter.Clear();
         }
 
-        return Math.Ceiling((float)step / 2);
+        return Math.Ceiling((float)visitedSquares.Count / 2);
     }
 
     protected override object SecondTask()
@@ -82,31 +68,36 @@ public class Day10 : StringListDay
         }
 
         var step = 0;
-        var currentSquares = GetNeighbours(start, maxX, maxY, 'S').ToList().Take(1).ToList();
         var visitedSquares = new HashSet<(int x, int y)>();
-        visitedSquares.Add(start);
-        while (currentSquares.Count > 0)
+        var square = start;
+        while (true)
         {
-            var nextIter = new List<(int x, int y)>();
-            foreach (var square in currentSquares)
+            visitedSquares.Add(square);
+            square = GetNeighbours(square, maxX, maxY, map[square.y][square.x]).FirstOrDefault(x => !visitedSquares.Contains(x), (-1, -1));
+            if (square.x == -1)
             {
-                if (!visitedSquares.Add(square))
-                {
-                    continue;
-                }
-                if (square.x == start.x && square.y == start.y)
-                {
-                    currentSquares.Clear();
-                    break;
-                }
-                nextIter.AddRange(GetNeighbours(square, maxX, maxY, map[square.y][square.x]));
+                break;
             }
             step++;
-
-            currentSquares.Clear();
-            currentSquares.AddRange(nextIter.Where(sq => !visitedSquares.Contains(sq)));
-            nextIter.Clear();
         }
+
+        maxX *= 2;
+        maxY *= 2;
+        var borderSquares = visitedSquares.Select(sq => sq with { x = sq.x * 2, y = sq.y * 2 }).ToList();
+        var midpoints = new List<(int, int)>();
+        for (int i = 0; i < visitedSquares.Count - 1; i++)
+        {
+            var current = borderSquares[i];
+            var next = borderSquares[i + 1];
+
+            midpoints.Add(GetMidpoint(current, next));
+        }
+
+        var c = borderSquares[borderSquares.Count - 1];
+        var n = borderSquares[0];
+
+        midpoints.Add(GetMidpoint(c, n));
+        borderSquares.AddRange(midpoints);
 
         var wallSquares = new HashSet<(int x, int y)>();
         foreach (var x in Enumerable.Range(0, maxX))
@@ -120,7 +111,7 @@ public class Day10 : StringListDay
             wallSquares.Add((maxX - 1, y));
         }
 
-        wallSquares = wallSquares.Except(visitedSquares).ToHashSet();
+        wallSquares = wallSquares.Except(borderSquares).ToHashSet();
 
         var nextSquares = wallSquares.ToHashSet();
         while (nextSquares.Any())
@@ -129,73 +120,26 @@ public class Day10 : StringListDay
             nextSquares.Clear();
             foreach (var sq in next)
             {
-                if (!visitedSquares.Contains(sq) && wallSquares.Add(sq))
+                if (!borderSquares.Contains(sq) && wallSquares.Add(sq))
                 {
                     nextSquares.Add(sq);
                 }
             }
         }
 
-        var allSquares = GenerateCoordinates(maxY, maxX).Except(wallSquares.Concat(visitedSquares));
-        foreach (var s in allSquares) {
-            this.map[s.y][s.x] = '.';
-        }
+        var allSquares = GenerateCoordinates(maxY, maxX).Except(borderSquares).Except(wallSquares).Where(sq => sq.x % 2 == 0 && sq.y % 2 == 0).ToList();
 
-        return null;
-        // return allSquares.Count(sq =>
-        // {
-        //     var alreadyVisited = new HashSet<(float x, float y)>();
-        //     var next = new List<(float x, float y)>() { sq };
-        //     while (next.Any())
-        //     {
-        //         HashSet<(float x, float y)> nextGen = new();
-        //         foreach (var n in next)
-        //         {
-        //             if (alreadyVisited.Add(n))
-        //             {
-        //                 foreach (var ng in GetAll(n, maxX, maxY))
-        //                 {
-        //                     nextGen.Add(ng);
-        //                 }
-        //             }
-        //         }
-
-        //         next = nextGen.ToList();
-        //         nextGen.Clear();
-        //     }
-        // });
+        return allSquares.Count;
     }
 
     private IEnumerable<(int x, int y)> GetNeighbours((int x, int y) current, int maxX, int maxY, char symbol, bool validate = true)
     {
-        var directions = new List<(int x, int y)>() {
-            (1, 0),
-            (-1, 0),
-            (0, current.y + 1),
-            (0, current.y - 1),
-        };
-
         var possibleDirections = this.symbolMap[symbol];
 
         return possibleDirections
             .Select(pd => (x: current.x + pd.x, y: current.y + pd.y))
             .Where(c => c.x >= 0 && c.x < maxX && c.y >= 0 && c.y < maxY)
             .Where(c => !validate || GetNeighbours(c, maxX, maxY, this.map[c.y][c.x], false).Contains(current));
-    }
-
-    private IEnumerable<(float x, float y)> GetAll((float x, float y) current, int maxX, int maxY)
-    {
-        return new List<(float x, float y)>() {
-            (-.5f, -.5f),
-            (0f, -.5f),
-            (.5f, -.5f),
-            (-.5f, 0f),
-            (0f, 0f),
-            (.5f, 0f),
-            (-.5f, .5f),
-            (0f, .5f),
-            (.5f, .5f),
-        }.Select(change => (current.x + change.x, current.y + change.y));
     }
 
     static List<(int x, int y)> GenerateCoordinates(int rows, int columns)
@@ -211,5 +155,32 @@ public class Day10 : StringListDay
         }
 
         return coordinates;
+    }
+
+    static (int x, int y) GetMidpoint((int X, int Y) coord1, (int X, int Y) coord2)
+    {
+        int midX = (coord1.X + coord2.X) / 2;
+        int midY = (coord1.Y + coord2.Y) / 2;
+
+        return new(midX, midY);
+    }
+
+    static void Print2DMap(int maxX, int maxY, List<(int, int)> coordinates)
+    {
+        for (int y = 0; y < maxY; y++)
+        {
+            for (int x = 0; x < maxX; x++)
+            {
+                if (coordinates.Contains((x, y)))
+                {
+                    Console.Write("# ");
+                }
+                else
+                {
+                    Console.Write(". ");
+                }
+            }
+            Console.WriteLine();
+        }
     }
 }
