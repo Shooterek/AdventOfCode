@@ -1,13 +1,10 @@
 using AoE2023.Utils;
-using System.Text.RegularExpressions;
-using System.Text;
 using MoreLinq;
 
 namespace AoE2023;
 
 public class Day12 : StringListDay
 {
-    private readonly Regex regex2 = new Regex(@"#+");
     private readonly Dictionary<(string, int), long?> cache = new();
     protected override object FirstTask()
     {
@@ -69,12 +66,12 @@ public class Day12 : StringListDay
         {
             if (segmentIndex + 1 == numbers.Length)
             {
-                if (r.All(r => r != '#'))
+                if (NoHashes(r))
                 {
                     sum += 1;
                 }
             }
-            else if (r.Any(c => c == '?' || c == '#'))
+            else if (AnySpring(r))
             {
                 sum += GetPermutations(condition, r, numbers, segmentIndex + 1);
             }
@@ -82,6 +79,28 @@ public class Day12 : StringListDay
 
         this.cache.Add((src, segmentIndex), sum);
         return sum;
+
+        bool NoHashes(string r)
+        {
+            for (int i = 0; i < r.Length; i++)
+            {
+                if (r[i] == '#')
+                    return false;
+            }
+
+            return true;
+        }
+
+        bool AnySpring(string r)
+        {
+            for (int i = 0; i < r.Length; i++)
+            {
+                if (r[i] != '.')
+                    return true;
+            }
+
+            return false;
+        }
     }
 
     private IEnumerable<string> GetSegment(string src, int length)
@@ -113,7 +132,7 @@ public class Day12 : StringListDay
 
         bool CanEnd(int index) => index == src.Length - 1 || src[index + 1] == '?' || src[index + 1] == '.';
 
-        static bool AllHashes(string src, int start, int length)
+        bool AllHashes(string src, int start, int length)
         {
             for (int i = start; i < start + length; i++)
             {
