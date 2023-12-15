@@ -8,12 +8,13 @@ namespace AoE2023;
 public class Day12 : StringListDay
 {
     private readonly Regex regex2 = new Regex(@"#+");
-    private readonly Dictionary<(string, int, int), int?> cache = new();
+    private readonly Dictionary<(string, int, int), long?> cache = new();
     protected override object FirstTask()
     {
         var numbers = this.Input
             .Select(line =>
             {
+                this.cache.Clear();
                 var condition = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries)
                     .Skip(1).First()
@@ -23,9 +24,9 @@ public class Day12 : StringListDay
 
                 var springs = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
-                var permutations = GetPermutations(condition, springs, condition, 0, 0).ToArray();
+                var permutations = GetPermutations(condition, springs, condition, 0, 0);
 
-                return permutations.Sum();
+                return permutations;
             }).ToArray();
 
         return numbers.Sum();
@@ -36,6 +37,7 @@ public class Day12 : StringListDay
         var numbers = this.Input
             .Select((line, index) =>
             {
+                this.cache.Clear();
                 var condition = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries)
                     .Skip(1).First()
@@ -49,36 +51,36 @@ public class Day12 : StringListDay
                 var springs = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
                 springs = string.Join("?", Enumerable.Range(0, 5).Select(s => springs));
-                var permutations = GetPermutations(condition, springs, condition, 0, 0).ToArray();
+                var permutations = GetPermutations(condition, springs, condition, 0, 0);
 
-                return permutations.Sum();
+                return permutations;
             }).ToArray();
 
         return numbers.Sum();
     }
 
-    private IEnumerable<int> GetPermutations(int[] condition, string src, int[] numbers, int segmentIndex, int startFrom)
+    private long GetPermutations(int[] condition, string src, int[] numbers, int segmentIndex, int startFrom)
     {
+        if (this.cache.GetValueOrDefault((src, segmentIndex, startFrom)) is {} cachedValue)
+            return cachedValue;
         var results = GetSegment(src, numbers[segmentIndex], startFrom).ToArray();
+        var sum = 0L;
         foreach (var r in results)
         {
             if (segmentIndex + 1 == numbers.Length)
             {
                 var result = r.Item1.Replace('?', '.');
                 if (ConditionSucceeded(condition, result))
-                    yield return 1;
+                    sum += 1;
             }
             else
             {
-                if (this.cache.GetValueOrDefault((r.Item1, segmentIndex + 1, r.Item2)) is {} cachedValue)
-                    yield return cachedValue;
-
-                var nextResults = GetPermutations(condition, r.Item1, numbers, segmentIndex + 1, r.Item2).Sum();
-
-                this.cache.TryAdd((r.Item1, segmentIndex + 1, r.Item2), nextResults);
-                yield return nextResults;
+                sum += GetPermutations(condition, r.Item1, numbers, segmentIndex + 1, r.Item2);
             }
         }
+
+        this.cache.TryAdd((src, segmentIndex, startFrom), sum);
+        return sum;
     }
 
     private IEnumerable<(string, int)> GetSegment(string src, int length, int startIndex)
