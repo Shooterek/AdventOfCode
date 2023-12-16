@@ -5,7 +5,7 @@ namespace AoE2023;
 
 public class Day12 : StringListDay
 {
-    private readonly Dictionary<(string, int), long?> cache = new();
+    private readonly Dictionary<(string, int), long?> cache = [];
     protected override object FirstTask()
     {
         var numbers = this.Input
@@ -21,10 +21,8 @@ public class Day12 : StringListDay
 
                 var springs = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
-                var permutations = GetPermutations(condition, springs, condition, 0);
-
-                return permutations;
-            }).ToArray();
+                return GetPermutations(condition, springs, 0);
+            });
 
         return numbers.Sum();
     }
@@ -47,24 +45,21 @@ public class Day12 : StringListDay
                 var springs = line
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries).First();
                 springs = string.Join("?", Enumerable.Range(0, 5).Select(s => springs));
-                var permutations = GetPermutations(condition, springs, condition, 0);
-
-                return permutations;
-            }).ToArray();
+                return GetPermutations(condition, springs, 0);
+            });
 
         return numbers.Sum();
     }
 
-    private long GetPermutations(int[] condition, string src, int[] numbers, int segmentIndex)
+    private long GetPermutations(int[] condition, string src, int segmentIndex)
     {
         if (this.cache.GetValueOrDefault((src, segmentIndex)) is { } cachedValue)
             return cachedValue;
 
-        var results = GetSegment(src, numbers[segmentIndex]).ToArray();
         var sum = 0L;
-        foreach (var r in results)
+        foreach (var r in GetSegment(src, condition[segmentIndex]))
         {
-            if (segmentIndex + 1 == numbers.Length)
+            if (segmentIndex + 1 == condition.Length)
             {
                 if (NoHashes(r))
                 {
@@ -73,7 +68,7 @@ public class Day12 : StringListDay
             }
             else if (AnySpring(r))
             {
-                sum += GetPermutations(condition, r, numbers, segmentIndex + 1);
+                sum += GetPermutations(condition, r, segmentIndex + 1);
             }
         }
 
