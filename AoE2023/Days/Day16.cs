@@ -1,5 +1,7 @@
+using System.ComponentModel.DataAnnotations;
 using AoE2023.Utils;
 using FluentAssertions;
+using MoreLinq;
 
 namespace AoE2023;
 
@@ -40,36 +42,63 @@ public class Day16 : StringListDay
         var gridLength = grid[0].Length;
         var modifier = gridHeight > gridLength ? gridHeight : gridLength;
 
-        var cache = new Dictionary<Beam, List<int>>();
-        Beam start = new(0, 0, new(1, 0));
-
-        return GetBeams(start).Distinct().Count();
-
-        IEnumerable<int> GetBeams(Beam start)
+        var cache = new Dictionary<Beam, List<Beam>>();
+        var max = 0;
+        Enumerable.Range(0, gridHeight).ForEach(y =>
         {
-            if (cache.GetValueOrDefault(start) is {} list)
+            var result1 = GetBeams(new(0, y, new(1, 0))).Select(b => (b.X, b.Y)).Distinct().Count();
+            var result2 = GetBeams(new(gridLength - 1, y, new(-1, 0))).Select(b => (b.X, b.Y)).Distinct().Count();
+
+            max = Math.Max(max, Math.Max(result1, result2));
+        });
+
+        Console.WriteLine();
+        Enumerable.Range(0, gridLength).ForEach(x =>
+        {
+            var result1 = GetBeams(new(x, 0, new(0, 1))).Select(b => (b.X, b.Y)).Distinct().Count();
+            var result2 = GetBeams(new(x, gridHeight - 1, new(0, -1))).Select(b => (b.X, b.Y)).Distinct().Count();
+
+
+            max = Math.Max(max, Math.Max(result1, result2));
+        });
+
+        return max;
+        IEnumerable<Beam> GetBeams(Beam start)
+        {
+            if (cache.GetValueOrDefault(start) is { } list)
                 return list;
 
-            var visitedSquares = new HashSet<Beam>();
+            var visitedSquares = new HashSet<Beam>
+            {
+                start
+            };
             var currentBeams = new List<Beam>()
             {
                 start,
             };
-            visitedSquares.Add(start);
 
             while (currentBeams.Count > 0)
             {
-                var nextBeams = currentBeams.SelectMany(b => GetOutputBeams(b, grid[b.Y][b.X])).ToArray();
+                var nextBeams = currentBeams.SelectMany(b =>
+                {
+                    if (cache.GetValueOrDefault(b) is { } l)
+                    {
+                    }
+
+                    return GetOutputBeams(b, grid[b.Y][b.X]);
+                });
 
                 currentBeams = nextBeams
-                    .Where(b => b.X >= 0 && b.X < gridLength && b.Y >= 0 && b.Y < gridHeight).ToArray()
+                    .Where(b => b.X >= 0 && b.X < gridLength && b.Y >= 0 && b.Y < gridHeight)
                     .Where(visitedSquares.Add)
                     .ToList();
-            }
 
-            var squares = visitedSquares.Select(b => b.Y * modifier + b.X).ToList();
-            cache.Add(start, squares);
-            return squares;
+
+            };
+
+            var squareList = visitedSquares.ToArray();
+
+            return squareList;
         }
     }
 
@@ -165,3 +194,5 @@ public class Day16 : StringListDay
 public record Beam(int X, int Y, Direction Direction);
 
 public record Direction(int X, int Y);
+
+public record Coordinates(int X, int Y);
