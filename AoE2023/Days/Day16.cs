@@ -46,28 +46,23 @@ public class Day16 : StringListDay
         var max = 0;
         Enumerable.Range(0, gridHeight).ForEach(y =>
         {
-            var result1 = GetBeams(new(0, y, new(1, 0))).Select(b => (b.X, b.Y)).Distinct().Count();
-            var result2 = GetBeams(new(gridLength - 1, y, new(-1, 0))).Select(b => (b.X, b.Y)).Distinct().Count();
+            var result1 = GetBeams(new(0, y, new(1, 0))).Count();
+            var result2 = GetBeams(new(gridLength - 1, y, new(-1, 0))).Count();
 
             max = Math.Max(max, Math.Max(result1, result2));
         });
 
-        Console.WriteLine();
         Enumerable.Range(0, gridLength).ForEach(x =>
         {
-            var result1 = GetBeams(new(x, 0, new(0, 1))).Select(b => (b.X, b.Y)).Distinct().Count();
-            var result2 = GetBeams(new(x, gridHeight - 1, new(0, -1))).Select(b => (b.X, b.Y)).Distinct().Count();
-
+            var result1 = GetBeams(new(x, 0, new(0, 1))).Count();
+            var result2 = GetBeams(new(x, gridHeight - 1, new(0, -1))).Count();
 
             max = Math.Max(max, Math.Max(result1, result2));
         });
 
         return max;
-        IEnumerable<Beam> GetBeams(Beam start)
+        IEnumerable<int> GetBeams(Beam start)
         {
-            if (cache.GetValueOrDefault(start) is { } list)
-                return list;
-
             var visitedSquares = new HashSet<Beam>
             {
                 start
@@ -79,27 +74,18 @@ public class Day16 : StringListDay
 
             while (currentBeams.Count > 0)
             {
-                var nextBeams = currentBeams.SelectMany(b =>
-                {
-                    if (cache.GetValueOrDefault(b) is { } l)
-                    {
-                    }
-
-                    return GetOutputBeams(b, grid[b.Y][b.X]);
-                });
+                var nextBeams = currentBeams.SelectMany(b => GetOutputBeams(b, grid[b.Y][b.X]));
 
                 currentBeams = nextBeams
                     .Where(b => b.X >= 0 && b.X < gridLength && b.Y >= 0 && b.Y < gridHeight)
                     .Where(visitedSquares.Add)
                     .ToList();
-
-
             };
 
-            var squareList = visitedSquares.ToArray();
-
-            return squareList;
+            return visitedSquares.Select(GetId);
         }
+
+        int GetId(Beam b) => b.Y * modifier + b.X;
     }
 
     private void Test()
