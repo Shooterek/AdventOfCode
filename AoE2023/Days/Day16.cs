@@ -31,7 +31,6 @@ public class Day16 : StringListDay
         }
 
         Test();
-        Print2DMap(gridLength, gridHeight, visitedSquares.ToList());
 
         return visitedSquares.Select(b => (b.X, b.Y)).Distinct().Count();
     }
