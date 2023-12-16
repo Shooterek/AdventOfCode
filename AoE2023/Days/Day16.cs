@@ -1,7 +1,5 @@
 using AoE2023.Utils;
 using FluentAssertions;
-using MoreLinq;
-using System.Text.RegularExpressions;
 
 namespace AoE2023;
 
@@ -20,7 +18,7 @@ public class Day16 : StringListDay
         };
         visitedSquares.Add(start);
 
-        while (currentBeams.Any())
+        while (currentBeams.Count > 0)
         {
             var nextBeams = currentBeams.SelectMany(b => GetOutputBeams(b, grid[b.Y][b.X])).ToArray();
 
@@ -37,7 +35,42 @@ public class Day16 : StringListDay
 
     protected override object SecondTask()
     {
-        return null;
+        var grid = this.Input.Select(line => line.ToCharArray()).ToArray();
+        var gridHeight = grid.Length;
+        var gridLength = grid[0].Length;
+        var modifier = gridHeight > gridLength ? gridHeight : gridLength;
+
+        var cache = new Dictionary<Beam, List<int>>();
+        Beam start = new(0, 0, new(1, 0));
+
+        return GetBeams(start).Distinct().Count();
+
+        IEnumerable<int> GetBeams(Beam start)
+        {
+            if (cache.GetValueOrDefault(start) is {} list)
+                return list;
+
+            var visitedSquares = new HashSet<Beam>();
+            var currentBeams = new List<Beam>()
+            {
+                start,
+            };
+            visitedSquares.Add(start);
+
+            while (currentBeams.Count > 0)
+            {
+                var nextBeams = currentBeams.SelectMany(b => GetOutputBeams(b, grid[b.Y][b.X])).ToArray();
+
+                currentBeams = nextBeams
+                    .Where(b => b.X >= 0 && b.X < gridLength && b.Y >= 0 && b.Y < gridHeight).ToArray()
+                    .Where(visitedSquares.Add)
+                    .ToList();
+            }
+
+            var squares = visitedSquares.Select(b => b.Y * modifier + b.X).ToList();
+            cache.Add(start, squares);
+            return squares;
+        }
     }
 
     private void Test()
@@ -126,25 +159,6 @@ public class Day16 : StringListDay
         }
 
         return [src with { X = src.X + src.Direction.X, Y = src.Y + src.Direction.Y }];
-    }
-
-    static void Print2DMap(int maxX, int maxY, List<Beam> coordinates)
-    {
-        for (int y = 0; y < maxY; y++)
-        {
-            for (int x = 0; x < maxX; x++)
-            {
-                if (coordinates.Any(b => b.X == x && b.Y == y))
-                {
-                    Console.Write("#");
-                }
-                else
-                {
-                    Console.Write(".");
-                }
-            }
-            Console.WriteLine();
-        }
     }
 }
 
