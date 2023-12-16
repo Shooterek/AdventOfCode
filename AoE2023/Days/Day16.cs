@@ -1,4 +1,6 @@
 using AoE2023.Utils;
+using FluentAssertions;
+using MoreLinq;
 using System.Text.RegularExpressions;
 
 namespace AoE2023;
@@ -12,14 +14,15 @@ public class Day16 : StringListDay
         var gridLength = grid[0].Length;
         var visitedSquares = new HashSet<Beam>();
 
+        Beam start = new(0, 0, new(1, 0));
         var currentBeams = new List<Beam>() {
-            new (1, 0, new(-1, 0)),
+            start,
         };
+        visitedSquares.Add(start);
 
         while (currentBeams.Any())
         {
-
-            var nextBeams = currentBeams.SelectMany(b => GetOutputBeams(b, grid)).ToArray();
+            var nextBeams = currentBeams.SelectMany(b => GetOutputBeams(b, grid[b.Y][b.X])).ToArray();
 
             currentBeams = nextBeams
                 .Where(b => b.X >= 0 && b.X < gridLength && b.Y >= 0 && b.Y < gridHeight).ToArray()
@@ -27,9 +30,10 @@ public class Day16 : StringListDay
                 .ToList();
         }
 
+        Test();
         Print2DMap(gridLength, gridHeight, visitedSquares.ToList());
 
-        return visitedSquares.Count();
+        return visitedSquares.Select(b => (b.X, b.Y)).Distinct().Count();
     }
 
     protected override object SecondTask()
@@ -37,10 +41,51 @@ public class Day16 : StringListDay
         return null;
     }
 
-    private Beam[] GetOutputBeams(Beam src, char[][] grid)
+    private void Test()
     {
-        var instruction = grid[src.Y][src.X];
+        var b1 = GetOutputBeams(new(0, 0, new(0, -1)), '-');
+        var b2 = GetOutputBeams(new(0, 0, new(0, 1)), '-');
+        var b3 = GetOutputBeams(new(0, 0, new(-1, 0)), '-');
+        var b4 = GetOutputBeams(new(0, 0, new(1, 0)), '-');
 
+        b1.Should().BeEquivalentTo([new Beam(-1, 0, new(-1, 0)), new Beam(1, 0, new(1, 0))]);
+        b2.Should().BeEquivalentTo([new Beam(-1, 0, new(-1, 0)), new Beam(1, 0, new(1, 0))]);
+        b3.Should().BeEquivalentTo([new Beam(-1, 0, new(-1, 0))]);
+        b4.Should().BeEquivalentTo([new Beam(1, 0, new(1, 0))]);
+
+        var b5 = GetOutputBeams(new(0, 0, new(0, 1)), '|');
+        var b6 = GetOutputBeams(new(0, 0, new(0, -1)), '|');
+        var b7 = GetOutputBeams(new(0, 0, new(-1, 0)), '|');
+        var b8 = GetOutputBeams(new(0, 0, new(1, 0)), '|');
+
+        b5.Should().BeEquivalentTo([new Beam(0, 1, new(0, 1))]);
+        b6.Should().BeEquivalentTo([new Beam(0, -1, new(0, -1))]);
+        b7.Should().BeEquivalentTo([new Beam(0, -1, new(0, -1)), new Beam(0, 1, new(0, 1))]);
+        b8.Should().BeEquivalentTo([new Beam(0, -1, new(0, -1)), new Beam(0, 1, new(0, 1))]);
+
+        var m1 = GetOutputBeams(new(0, 0, new(1, 0)), '\\');
+        var m2 = GetOutputBeams(new(0, 0, new(-1, 0)), '\\');
+        var m3 = GetOutputBeams(new(0, 0, new(0, -1)), '\\');
+        var m4 = GetOutputBeams(new(0, 0, new(0, 1)), '\\');
+
+        m1.Should().BeEquivalentTo([new Beam(0, 1, new(0, 1))]);
+        m2.Should().BeEquivalentTo([new Beam(0, -1, new(0, -1))]);
+        m3.Should().BeEquivalentTo([new Beam(-1, 0, new(-1, 0))]);
+        m4.Should().BeEquivalentTo([new Beam(1, 0, new(1, 0))]);
+
+        var m5 = GetOutputBeams(new(0, 0, new(1, 0)), '/');
+        var m6 = GetOutputBeams(new(0, 0, new(-1, 0)), '/');
+        var m7 = GetOutputBeams(new(0, 0, new(0, -1)), '/');
+        var m8 = GetOutputBeams(new(0, 0, new(0, 1)), '/');
+
+        m5.Should().BeEquivalentTo([new Beam(0, -1, new(0, -1))]);
+        m6.Should().BeEquivalentTo([new Beam(0, 1, new(0, 1))]);
+        m7.Should().BeEquivalentTo([new Beam(1, 0, new(1, 0))]);
+        m8.Should().BeEquivalentTo([new Beam(-1, 0, new(-1, 0))]);
+    }
+
+    private Beam[] GetOutputBeams(Beam src, char instruction)
+    {
         if (instruction == '-')
         {
             if (src.Direction.X != 0)
@@ -50,8 +95,8 @@ public class Day16 : StringListDay
             if (src.Direction.Y != 0)
             {
                 return [
-                    src with { X = src.X + src.Direction.Y, Y = src.Direction.Y, Direction = new(src.Direction.Y, 0) },
-                    src with { X = src.X - src.Direction.Y, Y = src.Direction.Y, Direction = new(-src.Direction.Y, 0) },
+                    src with { X = src.X + 1, Direction = new(1, 0) },
+                    src with { X = src.X - 1, Direction = new(-1, 0) },
                 ];
             }
         }
@@ -65,20 +110,20 @@ public class Day16 : StringListDay
             if (src.Direction.X != 0)
             {
                 return [
-                    src with { Y = src.Y + src.Direction.X, Direction = new(0, src.Direction.X) },
-                    src with { Y = src.Y - src.Direction.X, Direction = new(0, -src.Direction.X) },
+                    src with { Y = src.Y + 1, Direction = new(0, 1) },
+                    src with { Y = src.Y - 1, Direction = new(0, -1) },
                 ];
             }
         }
 
         if (instruction == '\\')
         {
-            return [src with { X = src.X - src.Direction.Y, Y = src.Y + src.Direction.X, Direction = new(-src.Direction.Y, -src.Direction.X) }];
+            return [src with { X = src.X + src.Direction.Y, Y = src.Y + src.Direction.X, Direction = new(src.Direction.Y, src.Direction.X) }];
         }
 
         if (instruction == '/')
         {
-            return [src with { X = src.X + src.Direction.Y, Y = src.Y - src.Direction.X, Direction = new(src.Direction.Y, src.Direction.X) }];
+            return [src with { X = src.X - src.Direction.Y, Y = src.Y - src.Direction.X, Direction = new(-src.Direction.Y, -src.Direction.X) }];
         }
 
         return [src with { X = src.X + src.Direction.X, Y = src.Y + src.Direction.Y }];
@@ -86,9 +131,9 @@ public class Day16 : StringListDay
 
     static void Print2DMap(int maxX, int maxY, List<Beam> coordinates)
     {
-        for (int y = 0; y <= maxY; y++)
+        for (int y = 0; y < maxY; y++)
         {
-            for (int x = 0; x <= maxX; x++)
+            for (int x = 0; x < maxX; x++)
             {
                 if (coordinates.Any(b => b.X == x && b.Y == y))
                 {
