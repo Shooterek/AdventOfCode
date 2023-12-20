@@ -96,6 +96,10 @@ public class Day18 : StringListDay
             points.Add(start);
         }
 
+        var xOffset = points.MinBy(sq => sq.X).X;
+        var yOffset = points.MinBy(sq => sq.Y).Y;
+        points = points.Select(p => p with { X = p.X - xOffset, Y = p.Y - yOffset }).ToHashSet();
+        
         var xOrder = points.Select(p => p.X).Order().Distinct().ToList();
         var yOrder = points.Select(p => p.Y).Order().Distinct().ToList();
 
@@ -138,8 +142,8 @@ public class Day18 : StringListDay
             }
         }
 
-        var xOffset = pointsPrim.MinBy(sq => sq.X).X;
-        var yOffset = pointsPrim.MinBy(sq => sq.Y).Y;
+        xOffset = pointsPrim.MinBy(sq => sq.X).X;
+        yOffset = pointsPrim.MinBy(sq => sq.Y).Y;
 
         pointsPrim = pointsPrim.Select(p => p with { X = p.X - xOffset, Y = p.Y - yOffset }).ToHashSet();
 
@@ -172,7 +176,9 @@ public class Day18 : StringListDay
             }
         }
 
-        long allSquares = (points.MaxBy(p => p.X).X + 1) * (points.MaxBy(p => p.Y).Y + 1);
+        long mX = points.MaxBy(p => p.X).X + 1;
+        long mY = points.MaxBy(p => p.Y).Y + 1;
+        long allSquares = mX * mY;
 
         var temp = new List<long>();
 
@@ -185,8 +191,7 @@ public class Day18 : StringListDay
                 {
                     var xCount = (xOrder[x]) - (x > 0 ? xOrder[x - 1] : 1);
                     var yCount = (yOrder[y]) - (y > 0 ? yOrder[y - 1] : 1);
-                    temp.Add(yCount);
-                    temp.Add(xCount);
+                    temp.Add(Math.Abs(xCount) * Math.Abs(yCount));
                     allSquares -= Math.Abs(xCount) * Math.Abs(yCount);
                 }
             }
